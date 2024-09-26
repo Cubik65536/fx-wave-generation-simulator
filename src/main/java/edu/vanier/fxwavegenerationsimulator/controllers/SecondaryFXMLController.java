@@ -1,6 +1,6 @@
-package edu.vanier.template.controllers;
+package edu.vanier.fxwavegenerationsimulator.controllers;
 
-import edu.vanier.template.MainApp;
+import edu.vanier.fxwavegenerationsimulator.MainApp;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
