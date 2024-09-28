@@ -28,8 +28,13 @@ public class Wave {
      * @param waveType The type of the wave (sin/cos).
      * @param frequency The frequency of the wave (in Hz).
      * @param amplitude The amplitude of the wave (a value between 0 and 1).
+     * @throws IllegalArgumentException If the amplitude is not between 0 and 1.
      */
-    public Wave(WaveTypes waveType, int frequency, double amplitude) {
+    public Wave(WaveTypes waveType, int frequency, double amplitude) throws IllegalArgumentException {
+        if (amplitude < 0 || amplitude > 1) {
+            throw new IllegalArgumentException("Amplitude must be between 0 and 1.");
+        }
+
         this.waveType = waveType;
         this.frequency = frequency;
         this.amplitude = amplitude;
@@ -110,7 +115,10 @@ public class Wave {
      * Set a new amplitude for the wave.
      * @param amplitude The new amplitude (a value between 0 and 1).
      */
-    public void setAmplitude(double amplitude) {
+    public void setAmplitude(double amplitude) throws IllegalArgumentException {
+        if (amplitude < 0 || amplitude > 1) {
+            throw new IllegalArgumentException("Amplitude must be between 0 and 1.");
+        }
         this.amplitude = amplitude;
     }
 }
