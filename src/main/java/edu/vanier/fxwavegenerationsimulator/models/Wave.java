@@ -5,7 +5,7 @@ import edu.vanier.fxwavegenerationsimulator.enums.WaveTypes;
 /**
  * This class represents a discrete wave in the simulation.
  * It have the following attributes to represent the wave: type (an `enum`, SIN or COS),
- * frequency (Hz, takes a integer), and amplitude (a double value that takes a value between 0 and 1).
+ * frequency (Hz, takes a integer), and amplitude (a double value that takes a value between -1 and 1).
  *
  * @author Qian Qian
  */
@@ -19,7 +19,7 @@ public class Wave {
      */
     private int frequency;
     /**
-     * The amplitude of the wave (a value between 0 and 1).
+     * The amplitude of the wave (a value between -1 and 1).
      */
     private double amplitude;
 
@@ -27,12 +27,12 @@ public class Wave {
      * Instantiate a discrete wave object with information provided.
      * @param waveType The type of the wave (sin/cos).
      * @param frequency The frequency of the wave (in Hz).
-     * @param amplitude The amplitude of the wave (a value between 0 and 1).
-     * @throws IllegalArgumentException If the amplitude is not between 0 and 1.
+     * @param amplitude The amplitude of the wave (a value between -1 and 1).
+     * @throws IllegalArgumentException If the amplitude is not between -1 and 1.
      */
     public Wave(WaveTypes waveType, int frequency, double amplitude) throws IllegalArgumentException {
-        if (amplitude < 0 || amplitude > 1) {
-            throw new IllegalArgumentException("Amplitude must be between 0 and 1.");
+        if (amplitude < -1 || amplitude > 1) {
+            throw new IllegalArgumentException("Amplitude must be between -1 and 1.");
         }
 
         this.waveType = waveType;
@@ -105,7 +105,7 @@ public class Wave {
 
     /**
      * Get the amplitude of the wave.
-     * @return The amplitude (a value between 0 and 1).
+     * @return The amplitude (a value between -1 and 1).
      */
     public double getAmplitude() {
         return amplitude;
@@ -113,11 +113,11 @@ public class Wave {
 
     /**
      * Set a new amplitude for the wave.
-     * @param amplitude The new amplitude (a value between 0 and 1).
+     * @param amplitude The new amplitude (a value between -1 and 1).
      */
     public void setAmplitude(double amplitude) throws IllegalArgumentException {
         if (amplitude < 0 || amplitude > 1) {
-            throw new IllegalArgumentException("Amplitude must be between 0 and 1.");
+            throw new IllegalArgumentException("Amplitude must be between -1 and 1.");
         }
         this.amplitude = amplitude;
     }
