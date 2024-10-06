@@ -12,6 +12,7 @@ import java.util.TimerTask;
  * This class extends the Thread class to run the simulation in a separate thread, which allows
  * constant updates of the wave simulation data.
  * By default, this class is set to update the simulation every 10 milliseconds.
+ *
  * @author Qian Qian
  */
 public class WaveSimulationController {

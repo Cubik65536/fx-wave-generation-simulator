@@ -22,6 +22,12 @@ public class Wave {
      * The amplitude of the wave (a value between -1 and 1).
      */
     private double amplitude;
+    /**
+     * The colour code of the wave.
+     * This will be automatically and randomly assigned when the wave is added to the simulation.
+     */
+    private Color color;
+
 
     /**
      * Instantiate a discrete wave object with information provided.
@@ -38,6 +44,8 @@ public class Wave {
         this.waveType = waveType;
         this.frequency = frequency;
         this.amplitude = amplitude;
+
+        color = new Color();
     }
 
     /**
@@ -53,9 +61,9 @@ public class Wave {
     /**
      * Calculate the position of the wave particle at a given position and time.
      * y(x, t) = A * sin(2pi * f * t - 2pi * x / lambda)
-     * @param x The position of the wave (in meters).
-     * @param t The time of the wave (in seconds).
-     * @return The position of the wave particle at the given position and time.
+     * @param x the position of the wave (in meters)
+     * @param t the time of the wave (in seconds)
+     * @return the position of the wave particle at the given position and time
      */
     public double amplitude(double x, double t) {
         double omega = 2 * Math.PI * frequency;
