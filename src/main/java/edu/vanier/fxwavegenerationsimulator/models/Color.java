@@ -68,4 +68,13 @@ public class Color {
     public int getBlue() {
         return blue;
     }
+
+    /**
+     * Get the color value in the format of (R, G, B).
+     * @return the color value in the format of (R, G, B).
+     */
+    @Override
+    public String toString() {
+        return "(" + red + ", " + green + ", " + blue + ")";
+    }
 }

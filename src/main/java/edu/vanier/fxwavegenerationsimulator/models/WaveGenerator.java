@@ -2,6 +2,7 @@ package edu.vanier.fxwavegenerationsimulator.models;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This class represents the generation logic behind wave calculation.

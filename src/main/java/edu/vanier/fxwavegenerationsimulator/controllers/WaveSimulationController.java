@@ -1,11 +1,12 @@
 package edu.vanier.fxwavegenerationsimulator.controllers;
 
+import edu.vanier.fxwavegenerationsimulator.enums.WaveTypes;
+import edu.vanier.fxwavegenerationsimulator.models.Color;
 import edu.vanier.fxwavegenerationsimulator.models.Wave;
 import edu.vanier.fxwavegenerationsimulator.models.WaveGenerator;
 import edu.vanier.fxwavegenerationsimulator.models.WaveSimulationDisplay;
 
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
 /**
  * This is the controller class that handles all simulation logics for the application.
@@ -24,6 +25,15 @@ public class WaveSimulationController {
      * The default update interval of the wave simulation (in milliseconds).
      */
     private static final int DEFAULT_UPDATE_INTERVAL = 10;
+    /**
+     * The dummy wave object that represents the combined wave of all waves in the simulation.
+     */
+    private static final Wave combinedWave = new Wave(WaveTypes.SIN, 0, 0, new Color(0, 0, 0));
+
+    /**
+     * List that contains all Wave objects.
+     */
+    private List<Wave> waves;
 
     /**
      * The time elapsed in the simulation (in milliseconds).
@@ -86,6 +96,7 @@ public class WaveSimulationController {
      * @param sampleCount The number of sample (data points) to be generated used to generate the wave graph.
      */
     public WaveSimulationController(double totalLength, int sampleCount, WaveSimulationDisplay waveSimulationDisplay) {
+        this.waves = new ArrayList<>();
         this.milliseconds = 0;
         this.timer = new Timer();
         this.waveGenerator = new WaveGenerator();
@@ -99,6 +110,7 @@ public class WaveSimulationController {
      * @param wave The wave to be added to the wave generator.
      */
     public void addWave(Wave wave) {
+        this.waves.add(wave);
         waveGenerator.addWave(wave);
     }
 
@@ -107,12 +119,23 @@ public class WaveSimulationController {
      * and updates the wave simulation display.
      */
     private void simulate() {
-        double[] dataPoints = new double[sampleCount];
+        Map<Wave, double[]> dataPoints = new HashMap<>();
 
+        double[] dataPointsCombined = new double[sampleCount];
         double gap = totalLength / sampleCount;
         for (int i = 0; i < sampleCount; i++) {
             double x = i * gap;
-            dataPoints[i] = waveGenerator.combineWaves(x, milliseconds / 1000.0);
+            dataPointsCombined[i] = waveGenerator.combineWaves(x, milliseconds / 1000.0);
+        }
+        dataPoints.put(combinedWave, dataPointsCombined);
+
+        for (Wave wave : waves) {
+            double[] dataPointsWave = new double[sampleCount];
+            for (int i = 0; i < sampleCount; i++) {
+                double x = i * gap;
+                dataPointsWave[i] = wave.amplitude(x, milliseconds / 1000.0);
+            }
+            dataPoints.put(wave, dataPointsWave);
         }
 
         waveSimulationDisplay.update(dataPoints);

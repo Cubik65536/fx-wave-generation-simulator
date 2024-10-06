@@ -26,11 +26,11 @@ public class Wave {
      * The colour code of the wave.
      * This will be automatically and randomly assigned when the wave is added to the simulation.
      */
-    private Color color;
+    final private Color color;
 
 
     /**
-     * Instantiate a discrete wave object with information provided.
+     * Instantiate a discrete wave object with information provided, with a random colour code.
      * @param waveType The type of the wave (sin/cos).
      * @param frequency The frequency of the wave (in Hz).
      * @param amplitude The amplitude of the wave (a value between -1 and 1).
@@ -46,6 +46,25 @@ public class Wave {
         this.amplitude = amplitude;
 
         color = new Color();
+    }
+
+    /**
+     * Instantiate a discrete wave object with information provided.
+     * @param waveType The type of the wave (sin/cos).
+     * @param frequency The frequency of the wave (in Hz).
+     * @param amplitude The amplitude of the wave (a value between -1 and 1).
+     * @param color The colour code of the wave.
+     * @throws IllegalArgumentException If the amplitude is not between -1 and 1.
+     */
+    public Wave(WaveTypes waveType, int frequency, double amplitude, Color color) throws IllegalArgumentException {
+        if (amplitude < -1 || amplitude > 1) {
+            throw new IllegalArgumentException("Amplitude must be between -1 and 1.");
+        }
+
+        this.waveType = waveType;
+        this.frequency = frequency;
+        this.amplitude = amplitude;
+        this.color = color;
     }
 
     /**
@@ -128,5 +147,13 @@ public class Wave {
             throw new IllegalArgumentException("Amplitude must be between -1 and 1.");
         }
         this.amplitude = amplitude;
+    }
+
+    /**
+     * Get the colour code of the wave.
+     * @return The colour code of the wave.
+     */
+    public Color getColor() {
+        return color;
     }
 }
