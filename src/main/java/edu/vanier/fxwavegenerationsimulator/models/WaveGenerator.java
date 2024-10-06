@@ -2,6 +2,7 @@ package edu.vanier.fxwavegenerationsimulator.models;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This class represents the generation logic behind wave calculation.
@@ -24,7 +25,7 @@ public class WaveGenerator {
 
     /**
      * Adds a wave to the Generator.
-     * @param wave
+     * @param wave the wave to be added
      */
     public void addWave(Wave wave) {
         waves.add(wave);
@@ -32,14 +33,14 @@ public class WaveGenerator {
 
     /**
      * Calculates the amplitude of the combined waves at a given position and time.
-     * @param pos
-     * @param time
+     * @param x the position of the wave (in meters)
+     * @param t the time of the wave (in seconds)
      * @return the amplitude of the combined waves
      */
-    public double combineWaves (double pos, double time) {
+    public double combineWaves(double x, double t) {
         double ampFinal = 0;
         for (Wave wave : waves) {
-            ampFinal += wave.amplitude(pos, time);
+            ampFinal += wave.amplitude(x, t);
         }
         return ampFinal;
     }
