@@ -172,4 +172,8 @@ public class WaveSimulationController {
         this.milliseconds += milliseconds;
         simulate();
     }
+
+    public List<Wave> getWaves() {
+        return waves;
+    }
 }
