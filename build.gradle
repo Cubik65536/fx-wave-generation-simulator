@@ -6,6 +6,7 @@ plugins {
 }
 
 def logbackVersion = "1.4.11"
+def gsonVersion = "2.11.0"
 def javafxVersion = "22.0.2"
 
 repositories {
@@ -37,6 +38,7 @@ dependencies {
     // Link Logback to the project: @see: https://logback.qos.ch/ 
     implementation "ch.qos.logback:logback-classic:$logbackVersion"
     implementation "ch.qos.logback:logback-core:$logbackVersion"
+    implementation "com.google.code.gson:gson:$gsonVersion"
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
