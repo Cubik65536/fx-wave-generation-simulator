@@ -128,7 +128,7 @@ public class WaveSimulationController {
      * The main simulation logic, that calculates the amplitude of the combined waves at each sample point,
      * and updates the wave simulation display.
      */
-    private void simulate() {
+    public void simulate() {
         Map<Wave, double[]> dataPoints = new HashMap<>();
 
         double[] dataPointsCombined = new double[sampleCount];

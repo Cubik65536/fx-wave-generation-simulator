@@ -1,39 +1,80 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.shape.Line?>
 <?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1">
-   <center>
-      <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+<GridPane prefHeight="604.0" prefWidth="940.0" xmlns="http://javafx.com/javafx/23" xmlns:fx="http://javafx.com/fxml/1">
+   <columnConstraints>
+      <ColumnConstraints hgrow="SOMETIMES" maxWidth="972.0" minWidth="10.0" prefWidth="740.0" />
+      <ColumnConstraints hgrow="SOMETIMES" maxWidth="514.0" minWidth="0.0" prefWidth="0.0" />
+      <ColumnConstraints hgrow="SOMETIMES" maxWidth="514.0" minWidth="10.0" prefWidth="358.0" />
+   </columnConstraints>
+   <rowConstraints>
+      <RowConstraints maxHeight="675.0" minHeight="10.0" prefHeight="68.0" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="675.0" minHeight="0.0" prefHeight="0.0" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="641.0" minHeight="10.0" prefHeight="365.0" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="246.0" minHeight="10.0" prefHeight="194.0" vgrow="SOMETIMES" />
+   </rowConstraints>
+   <children>
+      <HBox alignment="CENTER" prefHeight="357.0" prefWidth="156.0" spacing="10.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
          <children>
-            <VBox>
-               <children>
-                  <Label text="A JavaFX project template. Primary scene">
-                     <font>
-                        <Font size="14.0" />
-                     </font>
-                  </Label>
-                  <HBox prefHeight="45.0" prefWidth="219.0">
-                     <children>
-                        <Button fx:id="btnClickMe" alignment="BOTTOM_CENTER" mnemonicParsing="false" text="Click me!" />
-                        <Button fx:id="btnSwitchScene" text="Switch to Secondary Scene">
-                           <HBox.margin>
-                              <Insets left="10.0" />
-                           </HBox.margin></Button>
-                     </children>
-                     <VBox.margin>
-                        <Insets top="20.0" />
-                     </VBox.margin>
-                  </HBox>
-               </children>
-            </VBox>
+            <Line endX="-1316.996826171875" endY="2938.46533203125" startX="-1316.996826171875" startY="1130.1724853515625" />
          </children>
       </HBox>
-   </center>
-</BorderPane>
+      <HBox alignment="CENTER" prefHeight="191.0" prefWidth="671.0" spacing="10.0" GridPane.rowIndex="3">
+         <Label text="Added Waves:" />
+         <AnchorPane>
+            <children>
+               <TableView fx:id="addedWavesTableView" layoutY="36.0" prefHeight="147.0" prefWidth="433.0">
+                  <columns>
+                     <TableColumn fx:id="typeColumn" prefWidth="126.0" text="Type" />
+                     <TableColumn fx:id="frequencyColumn" prefWidth="115.0" text="Frequency (Hz)" />
+                     <TableColumn fx:id="amplitudeColumn" prefWidth="73.0" text="Amplitude" />
+                     <TableColumn fx:id="currentAmplitudeColumn" prefWidth="116.0" text="Current Amplitude" />
+                  </columns>
+               </TableView>
+               <Button fx:id="stepButton" layoutX="240.0" mnemonicParsing="false" text="Step" />
+               <Button fx:id="pauseButton" layoutX="82.0" mnemonicParsing="false" text="pause" />
+               <Button fx:id="playButton" layoutX="149.0" mnemonicParsing="false" text="playButton" />
+            </children>
+         </AnchorPane>
+         <Button fx:id="AddWave" mnemonicParsing="false" text="AddWave" />
+      </HBox>
+      <Line endX="1333.292724609375" endY="7.748603820800781E-7" startX="-734.0" />
+      <HBox GridPane.columnIndex="1" />
+      <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="2">
+         <children>
+            <Button fx:id="exportButton" layoutX="216.0" layoutY="2.0" mnemonicParsing="false" text="Export" />
+            <Button fx:id="importButton" layoutX="164.0" layoutY="2.0" mnemonicParsing="false" text="Import" />
+            <Text layoutX="14.0" layoutY="20.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Wave Generation Simulator" wrappingWidth="202.13671875">
+               <font>
+                  <Font name="Cambria Math" size="12.0" />
+               </font>
+            </Text>
+         </children>
+      </AnchorPane>
+      <AnchorPane prefWidth="279.0" GridPane.columnIndex="2" GridPane.rowIndex="2">
+         <children>
+            <Slider fx:id="volumeSlider" layoutX="33.2896728515625" layoutY="156.0" prefHeight="14.0" prefWidth="160.0" />
+            <RadioButton fx:id="OnButton" layoutX="83.2896728515625" layoutY="126.0" mnemonicParsing="false" selected="true" text="On" />
+            <RadioButton fx:id="OffButton" layoutX="153.2896728515625" layoutY="126.0" mnemonicParsing="false" prefHeight="17.0" prefWidth="39.0" text="Off" />
+            <Label layoutX="33.2896728515625" layoutY="126.0" text="Audio:" />
+            <Label layoutX="12.2896728515625" layoutY="48.0" text="Presets:" />
+            <ComboBox fx:id="presetComboBox" layoutX="53.2896728515625" layoutY="44.0" prefHeight="25.0" prefWidth="215.0" />
+         </children>
+      </AnchorPane>
+   </children>
+</GridPane>

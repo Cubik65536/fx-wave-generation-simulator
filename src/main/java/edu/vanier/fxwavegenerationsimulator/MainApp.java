@@ -32,9 +32,8 @@ public class MainApp extends Application {
             logger.info("Bootstrapping the application...");
             // Load the scene of the primary stage.
             Parent root = loadFXML(MAINAPP_LAYOUT, new MainAppFXMLController());
-            scene = new Scene(root, 640, 480);
+            scene = new Scene(root, 940, 604);
             primaryStage.setScene(scene);
-            primaryStage.sizeToScene();
             // Put this appliation's main window on top of other already-opened windows
             // upon launching the app.
             primaryStage.setAlwaysOnTop(true);
