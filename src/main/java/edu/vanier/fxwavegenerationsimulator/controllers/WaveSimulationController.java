@@ -148,7 +148,7 @@ public class WaveSimulationController {
             dataPoints.put(wave, dataPointsWave);
         }
 
-        waveSimulationDisplay.update(dataPoints);
+        waveSimulationDisplay.update(dataPoints, milliseconds);
     }
 
     /**

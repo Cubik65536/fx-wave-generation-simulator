@@ -10,7 +10,7 @@ import java.util.Map;
 
 class WaveSimulationTestDisplay implements WaveSimulationDisplay {
     @Override
-    public void update(Map<Wave, double[]> dataPoints) {
+    public void update(Map<Wave, double[]> dataPoints, double milliseconds) {
         for (Wave wave : dataPoints.keySet()) {
             System.out.println("Data of " + wave.getColor() + " wave at x = 0: " + dataPoints.get(wave)[0]);
         }
