@@ -66,6 +66,10 @@
             </Text>
          </children>
       </AnchorPane>
+
+      <AnchorPane fx:id="chartPane" GridPane.rowIndex="2" GridPane.columnIndex="0" GridPane.columnSpan="2" prefHeight="120" prefWidth="370.0">
+      </AnchorPane>
+
       <AnchorPane prefWidth="279.0" GridPane.columnIndex="2" GridPane.rowIndex="2">
          <children>
             <Slider fx:id="volumeSlider" layoutX="33.2896728515625" layoutY="156.0" prefHeight="14.0" prefWidth="160.0" />

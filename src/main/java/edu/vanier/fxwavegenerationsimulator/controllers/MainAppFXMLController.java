@@ -4,11 +4,17 @@ import edu.vanier.fxwavegenerationsimulator.exceptions.ChosenFileIsDirectoryExce
 import edu.vanier.fxwavegenerationsimulator.exceptions.DataFileNotFoundException;
 import edu.vanier.fxwavegenerationsimulator.models.Wave;
 import edu.vanier.fxwavegenerationsimulator.models.WaveSimulationDisplay;
+import io.fair_acc.chartfx.XYChart;
+import io.fair_acc.chartfx.axes.spi.DefaultNumericAxis;
+import io.fair_acc.chartfx.plugins.Zoomer;
+import io.fair_acc.dataset.spi.DefaultDataSet;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.fxml.FXML;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
@@ -31,7 +37,7 @@ import static edu.vanier.fxwavegenerationsimulator.enums.WaveTypes.SIN;
  *  @author CihaoZhang
  */
 
-public class MainAppFXMLController {
+public class MainAppFXMLController implements WaveSimulationDisplay {
 
     private final static Logger logger = LoggerFactory.getLogger(MainAppFXMLController.class);
 
@@ -77,6 +83,11 @@ public class MainAppFXMLController {
     private Button AddWave;
 
     @FXML
+    private AnchorPane chartPane;
+
+    private XYChart chart;
+
+    @FXML
     public void initialize() {
         logger.info("Initializing MainAppController...");
 
@@ -116,8 +127,7 @@ public class MainAppFXMLController {
         }
 
         // TO-DO: Change simulation to work on waves
-        WaveSimulationDisplay waveSimulationDisplay = dataPoints -> waveSimulationController.simulate();
-        waveSimulationController = new WaveSimulationController(10, waveSimulationDisplay);
+        waveSimulationController = new WaveSimulationController(10, this);
 
         // TO-DO : Add functionality to add waves & Configure waveSimulationController
         AddWave.setOnAction(event -> {
@@ -126,6 +136,24 @@ public class MainAppFXMLController {
         });
 
         // TO-DO : Add audio after displaying Waves -> currently Impossible
+
+
+        // Set up the chart for wave visualization
+        DefaultNumericAxis xAxis = new DefaultNumericAxis("X-Axis");
+        DefaultNumericAxis yAxis = new DefaultNumericAxis("Y-Axis");
+        chart = new XYChart(xAxis, yAxis);
+
+        chart.setTitle("Wave Simulation");
+
+        // Enable zoom and pan
+        chart.getPlugins().add(new Zoomer());
+
+        // Add the chart to the chartPane (the placeholder in FXML)
+        chartPane.getChildren().add(chart);
+        AnchorPane.setTopAnchor(chart, 0.0);
+        AnchorPane.setBottomAnchor(chart, 0.0);
+        AnchorPane.setLeftAnchor(chart, 0.0);
+        AnchorPane.setRightAnchor(chart, 0.0);
     }
 
     @FXML
@@ -187,6 +215,28 @@ public class MainAppFXMLController {
         } catch (IOException e) {
             logger.error("An error occurred while exporting wave data: " + e.getMessage());
             showAlert("Error", "An error occurred while exporting wave data: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void update(Map<Wave, double[]> dataPoints, double milliseconds) {
+        // Clear previous data series
+        chart.getDatasets().clear();
+
+        // Iterate over each wave and its corresponding data points
+        for (Map.Entry<Wave, double[]> entry : dataPoints.entrySet()) {
+            Wave wave = entry.getKey();
+            double[] points = entry.getValue();
+
+            // Create a dataset for each wave
+            DefaultDataSet dataSet = new DefaultDataSet(wave.getWaveType().toString());
+
+            for (int i = 0; i < points.length; i++) {
+                dataSet.add(i, points[i]); // X is the index (time or position), Y is the amplitude
+            }
+
+            // Add the dataset to the chart
+            chart.getDatasets().add(dataSet);
         }
     }
 }
