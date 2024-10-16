@@ -12,7 +12,7 @@ class WaveSimulationTestDisplay implements WaveSimulationDisplay {
     @Override
     public void update(Map<Wave, double[]> dataPoints, double milliseconds) {
         for (Wave wave : dataPoints.keySet()) {
-            System.out.println("Data of " + wave.getColor() + " wave at x = 0: " + dataPoints.get(wave)[0]);
+            System.out.println("Data of " + wave.getColor() + " wave at x = 0 and t = " + milliseconds + "ms: " + dataPoints.get(wave)[0]);
         }
     }
 }
@@ -58,9 +58,49 @@ public class Driver {
         waveSimulationController.start();
     }
 
+    private static void pauseAndPlayTest() throws InterruptedException {
+        WaveSimulationTestDisplay waveSimulationTestDisplay = new WaveSimulationTestDisplay();
+        WaveSimulationController waveSimulationController = new WaveSimulationController(10.0, waveSimulationTestDisplay);
+
+        Wave wave1 = new Wave(WaveTypes.SIN, 1, 1);
+        Wave wave2 = new Wave(WaveTypes.SIN, 1, -1);
+
+        waveSimulationController.addWave(wave1);
+        waveSimulationController.addWave(wave2);
+
+        waveSimulationController.start();
+        Thread.sleep(5000);
+        waveSimulationController.pause();
+        Thread.sleep(5000);
+        waveSimulationController.start();
+    }
+
+    private static void stopAndPlayTest() throws InterruptedException {
+        WaveSimulationTestDisplay waveSimulationTestDisplay = new WaveSimulationTestDisplay();
+        WaveSimulationController waveSimulationController = new WaveSimulationController(10.0, waveSimulationTestDisplay);
+
+        Wave wave1 = new Wave(WaveTypes.SIN, 1, 1);
+        Wave wave2 = new Wave(WaveTypes.SIN, 1, -1);
+
+        waveSimulationController.addWave(wave1);
+        waveSimulationController.addWave(wave2);
+
+        waveSimulationController.start();
+        Thread.sleep(5000);
+        waveSimulationController.stop();
+        Thread.sleep(5000);
+        waveSimulationController.start();
+    }
+
     public static void main(String[] args) {
 //        simulationTest();
 //        exportTest();
-        importTest();
+//        importTest();
+        try {
+//            pauseAndPlayTest();
+            stopAndPlayTest();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }
