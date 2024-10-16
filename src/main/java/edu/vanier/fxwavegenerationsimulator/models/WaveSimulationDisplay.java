@@ -10,6 +10,7 @@ public interface WaveSimulationDisplay {
     /**
      * Update the display component with the latest wave simulation data.
      * @param dataPoints the map that contains the wave object and its corresponding data points to generate the wave graph.
+     * @param milliseconds the time elapsed since the simulation started.
      */
-    void update(Map<Wave, double[]> dataPoints);
+    void update(Map<Wave, double[]> dataPoints, double milliseconds);
 }
