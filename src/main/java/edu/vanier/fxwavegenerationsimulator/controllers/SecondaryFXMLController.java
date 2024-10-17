@@ -8,9 +8,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * FXML controller class for a secondary scene.
+ * FXML controller class for a secondary scene. Build #2
  *
- * @author frostybee
+ * @author Cihao Zhang
  */
 public class SecondaryFXMLController {
 

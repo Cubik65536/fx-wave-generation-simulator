@@ -19,6 +19,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.Map;
 
 import static edu.vanier.fxwavegenerationsimulator.controllers.JsonDataController.importWaveSimulation;
@@ -39,10 +41,21 @@ import static edu.vanier.fxwavegenerationsimulator.enums.WaveTypes.SIN;
  */
 
 public class MainAppFXMLController implements WaveSimulationDisplay {
+    /*
+    TO-DO for Build #2 & 3:
+    Fix Resizing of UI when Full Screen
+    Fix Wave Simulation calculation
+    Fix button methods
+    Implement Audio & calculatedAmplitude
+     */
 
     private final static Logger logger = LoggerFactory.getLogger(MainAppFXMLController.class);
 
-    private WaveSimulationController waveSimulationController;
+    public static WaveSimulationController waveSimulationController;
+
+    private Wave wave;
+
+    public DialogBoxController dialogBoxController;
 
     @FXML
     private Button importButton;
@@ -81,7 +94,7 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
     private TableColumn<Wave, Double> currentAmplitudeColumn;
 
     @FXML
-    private Button AddWave;
+    private Button addWave;
 
     @FXML
     private AnchorPane chartPane;
@@ -102,6 +115,8 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
         typeColumn.setCellValueFactory(new PropertyValueFactory<>("waveType"));
         frequencyColumn.setCellValueFactory(new PropertyValueFactory<>("frequency"));
         amplitudeColumn.setCellValueFactory(new PropertyValueFactory<>("amplitude"));
+        // The use of currentAmplitudeColumn is part of another build, as it requires Wave Generator to clash multiple waves.
+//        currentAmplitudeColumn.setCellValueFactory(new PropertyValueFactory<>("currentAmplitude"));
 
         // Initialize TableView
         addedWavesTableView.getItems().add(new Wave(SIN, 1, 1.0));
@@ -127,17 +142,25 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
             showAlert("Error", "Error initializing wave simulation: " + e.getMessage());
         }
 
-        // TO-DO: Change simulation to work on waves
         waveSimulationController = new WaveSimulationController(10, this);
 
         // TO-DO : Add functionality to add waves & Configure waveSimulationController
-        AddWave.setOnAction(event -> {
-            DialogBoxController dialogBoxController = new DialogBoxController();
+        addWave.setOnAction(event -> {
+            dialogBoxController = new DialogBoxController();
+            Stage dialogStage = new Stage();
+            dialogBoxController.initModality(Modality.APPLICATION_MODAL);
             dialogBoxController.showDialog(new Stage());
+            // TO-DO : Add functionality to add waves : Build #2
+            dialogStage.setOnHidden(e -> {
+                if (wave != null) {
+                    wave = dialogBoxController.getWave();
+                    System.out.println("Wave added: " + wave);
+                    addedWavesTableView.getItems().add(wave);
+                }
+            });
         });
 
-        // TO-DO : Add audio after displaying Waves -> currently Impossible
-
+        // TO-DO : Audio upon impact : Build #2 or #3
 
         // Set up the chart for wave visualization
         DefaultNumericAxis xAxis = new DefaultNumericAxis("X-Axis");
@@ -155,8 +178,13 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
         AnchorPane.setBottomAnchor(chart, 0.0);
         AnchorPane.setLeftAnchor(chart, 0.0);
         AnchorPane.setRightAnchor(chart, 0.0);
+        waveSimulationController.simulate();
     }
 
+    /**
+     * Handles the features from the import button. Opens a file chooser to select the JSON file to import.
+     * @param event The event triggered by the user clicking the import button.
+     */
     @FXML
     private void handleImportButton(ActionEvent event) {
         // Implement Import functionality
@@ -186,7 +214,12 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
         }
     }
 
-    private void showAlert(String title, String message) {
+    /**
+     * Gives an alert with the given title and message
+     * @param title the title of the alert
+     * @param message the error message
+     */
+    public static void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle(title);
         alert.setHeaderText(null);
@@ -194,6 +227,10 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
         alert.showAndWait();
     }
 
+    /**
+     * Handles the features from the export button. Opens a file chooser to select the JSON file to export.
+     * @param event The event triggered by the user clicking the export button.
+     */
     @FXML
     private void handleExportButton(ActionEvent event) {
         logger.info("Exporting wave data...");
@@ -219,6 +256,12 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
         }
     }
 
+    /**
+     * Creates a dataset for each wave and adds it to the chart. This method draws the graph of the wave.
+     * This is the main UI component of the application.
+     * @param dataPoints the map that contains the wave object and its corresponding data points to generate the wave graph.
+     * @param milliseconds the time elapsed since the simulation started.
+     */
     @Override
     public void update(Map<Wave, double[]> dataPoints, double milliseconds) {
         // Clear previous data series

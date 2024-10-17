@@ -2,7 +2,6 @@ package edu.vanier.fxwavegenerationsimulator.controllers;
 
 import edu.vanier.fxwavegenerationsimulator.enums.WaveTypes;
 import edu.vanier.fxwavegenerationsimulator.models.Wave;
-import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -14,12 +13,21 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 
+import static edu.vanier.fxwavegenerationsimulator.controllers.MainAppFXMLController.waveSimulationController;
+
 /**
  *  JavaFX controller class for the dialog box.
  *  @author CihaoZhang
  */
 
 public class DialogBoxController extends Stage {
+    static Wave wave;
+
+    /**
+     * The display method to show the dialog box.
+     * This isn't done in fxml because it is handled differently to be imported into the AddedWaves Tableview.
+     * @param primaryStage the primary stage
+     */
     public void showDialog (Stage primaryStage) {
         // Create a grid pane
         GridPane gridPane = new GridPane();
@@ -38,6 +46,18 @@ public class DialogBoxController extends Stage {
         // Create checkboxes for the type
         CheckBox sinCheckBox = new CheckBox("Sin");
         CheckBox cosCheckBox = new CheckBox("Cos");
+
+        sinCheckBox.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue) {
+                cosCheckBox.setSelected(false);
+            }
+        });
+
+        cosCheckBox.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue) {
+                sinCheckBox.setSelected(false);
+            }
+        });
 
         // Create buttons
         Button addButton = new Button("Add");
@@ -66,16 +86,28 @@ public class DialogBoxController extends Stage {
         // Add event handlers
         addButton.setOnAction(e -> {
             if (sinCheckBox.isSelected()) {
-//                waveSimulationController.addWave(new Wave(WaveTypes.SIN, Integer.parseInt(frequencyField.getText()),
-//                        Double.parseDouble(amplitudeField.getText())));
+                wave = new Wave(WaveTypes.SIN, Integer.parseInt(frequencyField.getText()),
+                        Double.parseDouble(amplitudeField.getText()));
+                System.out.println("A sin wave has been added.");
             } else if (cosCheckBox.isSelected()) {
-//                waveSimulationController.addWave(new Wave(WaveTypes.COS, Integer.parseInt(frequencyField.getText()),
-//                        Double.parseDouble(amplitudeField.getText())));
+                wave = new Wave(WaveTypes.COS, Integer.parseInt(frequencyField.getText()),
+                        Double.parseDouble(amplitudeField.getText()));
+                System.out.println("A cos wave has been added.");
             }
+            waveSimulationController.addWave(wave);
+
             primaryStage.hide();
         });
         cancelButton.setOnAction(e -> {
             primaryStage.hide();
         });
+    }
+
+    /**
+     * Getter for the wave object.
+     * @return A wave object
+     */
+    public Wave getWave() {
+        return wave;
     }
 }
