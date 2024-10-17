@@ -41,13 +41,6 @@ import static edu.vanier.fxwavegenerationsimulator.enums.WaveTypes.SIN;
  */
 
 public class MainAppFXMLController implements WaveSimulationDisplay {
-    /*
-    TO-DO for Build #2 & 3:
-    Fix Resizing of UI when Full Screen
-    Fix Wave Simulation calculation
-    Fix button methods
-    Implement Audio & calculatedAmplitude
-     */
 
     private final static Logger logger = LoggerFactory.getLogger(MainAppFXMLController.class);
 
@@ -148,7 +141,6 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
             showAlert("Error", "Error initializing wave simulation: " + e.getMessage());
         }
 
-        // TO-DO : Add functionality to add waves & Configure waveSimulationController
         addWave.setOnAction(event -> {
             dialogBoxController = new DialogBoxController();
             Stage dialogStage = new Stage();
@@ -173,7 +165,7 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
 
         chart.setTitle("Wave Simulation");
 
-        // Enable zoom and pan
+        // Enable zoom
         chart.getPlugins().add(new Zoomer());
 
         // Add the chart to the chartPane (the placeholder in FXML)
