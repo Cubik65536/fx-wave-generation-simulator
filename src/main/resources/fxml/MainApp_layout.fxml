@@ -51,7 +51,7 @@
                <Button fx:id="playButton" layoutX="149.0" mnemonicParsing="false" text="playButton" />
             </children>
          </AnchorPane>
-         <Button fx:id="AddWave" mnemonicParsing="false" text="AddWave" />
+         <Button fx:id="addWave" mnemonicParsing="false" text="AddWave" />
       </HBox>
       <Line endX="1333.292724609375" endY="7.748603820800781E-7" startX="-734.0" />
       <HBox GridPane.columnIndex="1" />
