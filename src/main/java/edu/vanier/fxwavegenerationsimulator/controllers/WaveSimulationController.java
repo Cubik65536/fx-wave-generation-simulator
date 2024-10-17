@@ -23,10 +23,6 @@ import java.util.*;
  * @author Qian Qian
  */
 public class WaveSimulationController {
-    public static String exportWaveSimulation(String jsonPath) {
-        return null;
-    }
-
     /**
      * The default sample count of the wave simulation.
      */
@@ -185,54 +181,6 @@ public class WaveSimulationController {
     public void step(int milliseconds) {
         this.milliseconds += milliseconds;
         simulate();
-    }
-
-    /**
-     * Import the simulation data from a JSON file and set this controller to the state of the imported simulation.
-     * @param jsonPath the fully qualified path of the JSON file that contains the simulation data
-     * @throws DataFileNotFoundException if the given path doesn't exist
-     * @throws ChosenFileIsDirectoryException if the given path represents a directory
-     */
-    public void importSimulation(String jsonPath) throws DataFileNotFoundException, ChosenFileIsDirectoryException {
-        File file = new File(jsonPath);
-        Scanner scanner = null;
-
-        if (file.isDirectory()) {
-            throw new ChosenFileIsDirectoryException(jsonPath);
-        }
-
-        try {
-            scanner = new Scanner(file);
-            JsonDataController.importWaveSimulation(this, scanner.nextLine());
-        } catch (FileNotFoundException e) {
-            throw new DataFileNotFoundException(jsonPath);
-        } finally {
-            if (scanner != null) {
-                scanner.close();
-            }
-        }
-    }
-
-    /**
-     * Export the current simulation to a JSON file.
-     * @param jsonPath the fully qualified path of the JSON file to export the simulation data to
-     * @throws IOException if the file cannot be created or written to
-     */
-    public void exportSimulation(String jsonPath) throws IOException {
-        File file = new File(jsonPath);
-
-        if (file.isDirectory()) {
-            throw new ChosenFileIsDirectoryException(jsonPath);
-        }
-
-        file.delete();
-        file.createNewFile();
-
-        String json = JsonDataController.exportWaveSimulation(this);
-
-        FileWriter writer = new FileWriter(file);
-        writer.write(json);
-        writer.close();
     }
 
     public List<Wave> getWaves() {
