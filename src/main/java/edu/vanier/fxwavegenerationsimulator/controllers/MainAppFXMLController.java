@@ -8,6 +8,7 @@ import io.fair_acc.chartfx.XYChart;
 import io.fair_acc.chartfx.axes.spi.DefaultNumericAxis;
 import io.fair_acc.chartfx.plugins.Zoomer;
 import io.fair_acc.dataset.spi.DefaultDataSet;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.fxml.FXML;
@@ -221,7 +222,7 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
     @Override
     public void update(Map<Wave, double[]> dataPoints, double milliseconds) {
         // Clear previous data series
-        chart.getDatasets().clear();
+        Platform.runLater(() -> chart.getDatasets().clear());
 
         // Iterate over each wave and its corresponding data points
         for (Map.Entry<Wave, double[]> entry : dataPoints.entrySet()) {
@@ -236,7 +237,7 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
             }
 
             // Add the dataset to the chart
-            chart.getDatasets().add(dataSet);
+            Platform.runLater(() -> chart.getDatasets().add(dataSet));
         }
     }
 }
