@@ -118,9 +118,15 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
         // The use of currentAmplitudeColumn is part of another build, as it requires Wave Generator to clash multiple waves.
 //        currentAmplitudeColumn.setCellValueFactory(new PropertyValueFactory<>("currentAmplitude"));
 
+        waveSimulationController = new WaveSimulationController(10, this);
+
+        Wave wave1 = new Wave(SIN, 1, 1.0);
+        Wave wave2 = new Wave(SIN, 1, -1.0);
         // Initialize TableView
-        addedWavesTableView.getItems().add(new Wave(SIN, 1, 1.0));
-        addedWavesTableView.getItems().add(new Wave(SIN, 1, -1.0));
+        addedWavesTableView.getItems().add(wave1);
+        addedWavesTableView.getItems().add(wave2);
+        waveSimulationController.addWave(wave1);
+        waveSimulationController.addWave(wave2);
 
         importButton.setOnAction(this::handleImportButton);
         exportButton.setOnAction(this::handleExportButton);
@@ -141,8 +147,6 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
             logger.error("Error initializing wave simulation: " + e.getMessage());
             showAlert("Error", "Error initializing wave simulation: " + e.getMessage());
         }
-
-        waveSimulationController = new WaveSimulationController(10, this);
 
         // TO-DO : Add functionality to add waves & Configure waveSimulationController
         addWave.setOnAction(event -> {
