@@ -10,24 +10,20 @@ import io.fair_acc.chartfx.plugins.Zoomer;
 import io.fair_acc.dataset.spi.DefaultDataSet;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
-import javafx.event.Event;
 import javafx.fxml.FXML;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.sound.sampled.LineUnavailableException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.Arrays;
 import java.util.Map;
 
 import static edu.vanier.fxwavegenerationsimulator.controllers.JsonDataController.importWaveSimulation;
@@ -111,7 +107,7 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
         // The use of currentAmplitudeColumn is part of another build, as it requires Wave Generator to clash multiple waves.
 //        currentAmplitudeColumn.setCellValueFactory(new PropertyValueFactory<>("currentAmplitude"));
 
-        waveSimulationController = new WaveSimulationController(10, this);
+        waveSimulationController = new WaveSimulationController(500, this);
 
         Wave wave1 = new Wave(SIN, 1, 1.0);
         Wave wave2 = new Wave(SIN, 1, -1.0);
@@ -143,17 +139,21 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
 
         addWave.setOnAction(event -> {
             dialogBoxController = new DialogBoxController();
-            Stage dialogStage = new Stage();
-            dialogBoxController.initModality(Modality.APPLICATION_MODAL);
-            dialogBoxController.showDialog(new Stage());
-            // TO-DO : Add functionality to add waves : Build #2
-            dialogStage.setOnHidden(e -> {
-                if (wave != null) {
-                    wave = dialogBoxController.getWave();
-                    System.out.println("Wave added: " + wave);
-                    addedWavesTableView.getItems().add(wave);
-                }
-            });
+            dialogBoxController.showAndWait();
+            Wave newWave = dialogBoxController.getWave();
+            try {
+                addedWavesTableView.getItems().add(newWave);
+                waveSimulationController.addWave(newWave);
+//                try {
+//                    soundController.addWave(newWave);
+//                    System.out.println("TBC");
+//                } catch (LineUnavailableException | IOException ex) {
+//                    throw new RuntimeException(ex);
+//                }
+            } catch (Exception e) {
+                logger.error("Error adding wave: " + e.getMessage());
+                showAlert("Error", "Error adding wave: " + e.getMessage());
+            }
         });
 
         // TO-DO : Audio upon impact : Build #2 or #3
@@ -174,6 +174,10 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
         AnchorPane.setBottomAnchor(chart, 0.0);
         AnchorPane.setLeftAnchor(chart, 0.0);
         AnchorPane.setRightAnchor(chart, 0.0);
+        xAxis.setMin(0);
+        xAxis.setMax(1000);
+        xAxis.setAutoRanging(false);
+        xAxis.setTickUnit(1);
         waveSimulationController.simulate();
     }
 

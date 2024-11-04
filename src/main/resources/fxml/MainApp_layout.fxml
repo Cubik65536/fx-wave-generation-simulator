@@ -13,8 +13,7 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-
-<BorderPane xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1">
+<BorderPane xmlns="http://javafx.com/javafx/23" xmlns:fx="http://javafx.com/fxml/1">
    <center>
 
             <AnchorPane fx:id="chartPane" prefHeight="120" prefWidth="370.0">
@@ -53,7 +52,7 @@
    <bottom>
       <AnchorPane BorderPane.alignment="CENTER">
          <children>
-            <TableView fx:id="addedWavesTableView" layoutY="36.0" prefHeight="147.0" prefWidth="433.0">
+            <TableView fx:id="addedWavesTableView" layoutY="36.0" prefHeight="147.0" prefWidth="428.0">
                <columns>
                   <TableColumn fx:id="typeColumn" prefWidth="126.0" text="Type" />
                   <TableColumn fx:id="frequencyColumn" prefWidth="115.0" text="Frequency (Hz)" />
@@ -63,11 +62,11 @@
             </TableView>
             <Button fx:id="stepButton" layoutX="240.0" mnemonicParsing="false" text="Step" />
             <Button fx:id="pauseButton" layoutX="82.0" mnemonicParsing="false" text="pause" />
-            <Button fx:id="playButton" layoutX="149.0" mnemonicParsing="false" text="playButton" />
-            <HBox alignment="CENTER" prefHeight="191.0" prefWidth="671.0" spacing="10.0">
-               <Label text="Added Waves:" />
+            <HBox alignment="CENTER" layoutX="435.0" prefHeight="191.0" prefWidth="236.0" spacing="10.0">
                <Button fx:id="addWave" mnemonicParsing="false" text="AddWave" />
+               <Label text="Added Waves:" />
             </HBox>
+            <Button fx:id="playButton" layoutX="149.0" mnemonicParsing="false" text="playButton" />
          </children>
       </AnchorPane>
    </bottom>
