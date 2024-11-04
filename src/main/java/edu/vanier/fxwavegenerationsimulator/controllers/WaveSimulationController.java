@@ -1,6 +1,7 @@
 package edu.vanier.fxwavegenerationsimulator.controllers;
 
 
+import edu.vanier.fxwavegenerationsimulator.MainApp;
 import edu.vanier.fxwavegenerationsimulator.db.DBConnector;
 import edu.vanier.fxwavegenerationsimulator.enums.WaveSimulationStatus;
 import edu.vanier.fxwavegenerationsimulator.enums.WaveTypes;
@@ -204,21 +205,22 @@ public class WaveSimulationController extends DBConnector {
      * and the related data points.
      * @param wave a wave object
      */
-    public void addWaveDB(String simulationName, Wave wave) {
+    public void addWaveDB(String simulationName, String waveName, Wave wave) {
         String sql = String.format(
-                "INSERT INTO %s (%s, %s, %s, %s, %s, %s) VALUES (?, ?, ?, ?, ?, ?)","Wave", "Name", "waveType", "frequency",
-                "amplitude", "data", "color");
+                "INSERT INTO %s (%s, %s, %s, %s, %s, %s, %s) VALUES (?, ?, ?, ?, ?, ?)","Wave", "Name", "waveName",
+                "waveType", "frequency", "amplitude", "data", "color");
 
         try {
             Connection conn = Connector("wave.db");
             PreparedStatement stmt = conn.prepareStatement(sql);
 
             stmt.setString(1, simulationName);
-            stmt.setString(2, wave.getWaveType().toString());
-            stmt.setInt(3, wave.getFrequency());
-            stmt.setDouble(4, wave.getAmplitude());
-            stmt.setString(5, getDataPoints());
-            stmt.setString(6, wave.getColor().toString());
+            stmt.setString(2, waveName);
+            stmt.setString(3, wave.getWaveType().toString());
+            stmt.setInt(4, wave.getFrequency());
+            stmt.setDouble(5, wave.getAmplitude());
+            stmt.setString(6, getDataPoints());
+            stmt.setString(7, wave.getColor().toString());
             stmt.executeUpdate(sql);
         } catch (Exception e) {
             e.printStackTrace();
@@ -229,13 +231,13 @@ public class WaveSimulationController extends DBConnector {
      * Retrieves the wave to the database, which puts all parameters (Wave, waveType, frequency, amplitude and color)
      * and related data points as a resultSet
      */
-    public void getWavesDB(String simulationName) {
+    public void getWavesDB(String simulationName, String waveName) {
         String sql = String.format("SELECT * FROM %s", "Wave");
         try {
             Connection conn = Connector("wave.db");
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
-            if (rs.getString("Name").equals(simulationName)) {
+            if (rs.getString("Name").equals(simulationName) && rs.getString("waveName").equals(waveName)) {
                 while (rs.next()) {
                     String waveType = rs.getString("waveType");
                     int frequency = rs.getInt("frequency");
@@ -261,6 +263,8 @@ public class WaveSimulationController extends DBConnector {
                     //TODO
 //                waveSimulationDisplay.update(data, milliseconds);
                 }
+            } else {
+                System.out.println("Not in db");
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -271,13 +275,18 @@ public class WaveSimulationController extends DBConnector {
      * Removes the wave based on a unique modifier color in the database.
      * @param simulationName the name of the given simulation
      */
-    public void clearWavesDB(String simulationName) {
+    public void clearWavesDB(String simulationName, String waveName) {
         String sql = String.format("DELETE FROM %s WHERE %s = ?", "Wave", "Name");
         try {
             Connection conn = Connector("wave.db");
             PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setString(1, "Name");
-            stmt.executeUpdate(sql);
+            ResultSet rs = stmt.executeQuery(sql);
+            if (rs.getString("Name").equals(simulationName) &&
+                    rs.getString("waveName").equals(waveName)) {
+                stmt.executeUpdate(sql);
+            } else {
+                System.out.println("Not found");
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -287,18 +296,20 @@ public class WaveSimulationController extends DBConnector {
      * Updates pre-existing waves in the database.
      * @param wave
      */
-    public void updateWavesDB(Wave wave) {
+    public void updateWavesDB(String simulationName, String waveName, Wave wave) {
         String sql = String.format("UPDATE %s SET %s = ?, %s = ?, %s = ?, %s = ?, %s = ? WHERE %s = ?", "Wave",
                 "waveType", "frequency", "amplitude", "data", "color", "color");
         try {
             Connection conn = Connector("wave.db");
             PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setString(1, wave.getWaveType().toString());
-            stmt.setInt(2, wave.getFrequency());
-            stmt.setDouble(3, wave.getAmplitude());
-            stmt.setString(4, getDataPoints());
-            stmt.setString(5, wave.getColor().toString());
-            stmt.setString(6, wave.getColor().toString());
+            ResultSet rs = stmt.executeQuery(sql);
+            if (rs.getString("Name").equals(simulationName) && rs.getString("waveName").equals(waveName)) {
+                stmt.setString(3, wave.getWaveType().toString());
+                stmt.setInt(4, wave.getFrequency());
+                stmt.setDouble(5, wave.getAmplitude());
+                stmt.setString(6, getDataPoints());
+                stmt.setString(7, wave.getColor().toString());
+            }
             stmt.executeUpdate(sql);
         } catch (Exception e) {
             e.printStackTrace();}

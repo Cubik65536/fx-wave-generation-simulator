@@ -137,7 +137,7 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
         Wave wave1 = new Wave(SIN, 1, 1.0);
         Wave wave2 = new Wave(SIN, 1, -1.0);
 //        try {
-//            addWave(wave1);
+//            addWave(  wave1);
 //            addWave(wave2);
 //        } catch (LineUnavailableException | IOException e) {
 //            throw new RuntimeException(e);
