@@ -1,5 +1,6 @@
 package edu.vanier.fxwavegenerationsimulator.controllers;
 
+import edu.vanier.fxwavegenerationsimulator.enums.WaveSimulationStatus;
 import edu.vanier.fxwavegenerationsimulator.exceptions.ChosenFileIsDirectoryException;
 import edu.vanier.fxwavegenerationsimulator.models.Wave;
 import edu.vanier.fxwavegenerationsimulator.models.WaveSimulationDisplay;
@@ -17,6 +18,7 @@ import javafx.stage.FileChooser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.sound.sampled.LineUnavailableException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -32,10 +34,10 @@ import static edu.vanier.fxwavegenerationsimulator.enums.WaveTypes.SIN;
  */
 
 public class MainAppFXMLController implements WaveSimulationDisplay {
-
     private final static Logger logger = LoggerFactory.getLogger(MainAppFXMLController.class);
 
-    public static WaveSimulationController waveSimulationController;
+    private WaveSimulationController waveSimulationController;
+    private SoundController soundController;
 
     private Wave wave;
 
@@ -88,9 +90,32 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
 
     private XYChart chart;
 
+    /**
+     * Add the new wave to ALL required places (simulation controller, audio controller, table view, etc.)
+     * @param newWave the new wave to be added
+     * @author Qian Qian
+     */
+    private void addWave(Wave newWave) throws LineUnavailableException, IOException {
+        // Add the new wave to the TableView
+        addedWavesTableView.getItems().add(newWave);
+        // Add the new wave to the WaveSimulationController and SoundController
+        waveSimulationController.addWave(newWave);
+        soundController.addWave(newWave);
+        // Update the chart with the new wave
+        waveSimulationController.simulate();
+    }
+
     @FXML
     public void initialize() {
         logger.info("Initializing MainAppController...");
+
+        waveSimulationController = new WaveSimulationController(500, this);
+        try {
+            soundController = new SoundController();
+        } catch (LineUnavailableException | IOException e) {
+            throw new RuntimeException(e);
+        }
+
         // Initialize ComboBox with presets
         // TO-DO: Add & Load Presets : Build #3
         presetComboBox.getItems().addAll("Pure Sin", "Square Wave", "Triangle Wave", "Sawtooth Wave");
@@ -109,15 +134,14 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
         // The use of currentAmplitudeColumn is part of another build, as it requires Wave Generator to clash multiple waves.
 //        currentAmplitudeColumn.setCellValueFactory(new PropertyValueFactory<>("currentAmplitude"));
 
-        waveSimulationController = new WaveSimulationController(500, this);
-
         Wave wave1 = new Wave(SIN, 1, 1.0);
         Wave wave2 = new Wave(SIN, 1, -1.0);
-        // Initialize TableView
-        addedWavesTableView.getItems().add(wave1);
-        addedWavesTableView.getItems().add(wave2);
-        waveSimulationController.addWave(wave1);
-        waveSimulationController.addWave(wave2);
+        try {
+            addWave(wave1);
+            addWave(wave2);
+        } catch (LineUnavailableException | IOException e) {
+            throw new RuntimeException(e);
+        }
 
         importButton.setOnAction(this::handleImportButton);
         exportButton.setOnAction(this::handleExportButton);
@@ -126,16 +150,19 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
             playButton.setOnAction(event -> {
                 waveSimulationController.start();
             });
-
             pauseButton.setOnAction(event -> {
                 waveSimulationController.pause();
-            });
 
+                // Stop sound when the simulation is paused
+                soundController.stop();
+                // Reset the audio playing toggle
+                audioOffButton.setSelected(true);
+            });
             stepButton.setOnAction(event -> {
                 waveSimulationController.step(100);
             });
         } catch (Exception e) {
-            logger.error("Error initializing wave simulation: " + e.getMessage());
+            logger.error("Error initializing wave simulation: {}", e.getMessage());
             showAlert("Error", "Error initializing wave simulation: " + e.getMessage());
         }
 
@@ -144,15 +171,26 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
             dialogBoxController.showAndWait();
             Wave newWave = dialogBoxController.getWave();
             try {
-                addedWavesTableView.getItems().add(newWave);
-                waveSimulationController.addWave(newWave);
-            } catch (Exception e) {
-                logger.error("Error adding wave: " + e.getMessage());
-                showAlert("Error", "Error adding wave: " + e.getMessage());
+                addWave(newWave);
+            } catch (LineUnavailableException | IOException e) {
+                throw new RuntimeException(e);
             }
         });
 
-        // TO-DO : Audio upon impact : Build #2 or #3
+        // Play sound when the audioOnButton is selected
+        audioOnButton.setOnAction(event -> {
+            if (waveSimulationController.getSimulationStatus() == WaveSimulationStatus.PLAYING) {
+                // Only play sound if the simulation is playing
+                soundController.start();
+            } else {
+                // Prevent the on button from being selected it's not playing
+                audioOffButton.setSelected(true);
+            }
+        });
+        // Stop sound when the audioOffButton is selected
+        audioOffButton.setOnAction(event -> {
+            soundController.stop();
+        });
 
         // Set up the chart for wave visualization
         DefaultNumericAxis xAxis = new DefaultNumericAxis("X-Axis");
@@ -174,7 +212,6 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
         xAxis.setMax(1000);
         xAxis.setAutoRanging(false);
         xAxis.setTickUnit(1);
-        waveSimulationController.simulate();
     }
 
     /**
