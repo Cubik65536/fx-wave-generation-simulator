@@ -1,17 +1,11 @@
 package edu.vanier.fxwavegenerationsimulator.controllers;
 
 import edu.vanier.fxwavegenerationsimulator.enums.WaveTypes;
-import edu.vanier.fxwavegenerationsimulator.exceptions.ChosenFileIsDirectoryException;
-import edu.vanier.fxwavegenerationsimulator.exceptions.DataFileNotFoundException;
 import edu.vanier.fxwavegenerationsimulator.models.Color;
 import edu.vanier.fxwavegenerationsimulator.models.Wave;
 import edu.vanier.fxwavegenerationsimulator.models.WaveGenerator;
 import edu.vanier.fxwavegenerationsimulator.models.WaveSimulationDisplay;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.*;
 
 /**

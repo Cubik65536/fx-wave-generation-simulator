@@ -2,12 +2,12 @@ package edu.vanier.fxwavegenerationsimulator.models;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * This class represents the generation logic behind wave calculation.
  * It creates a list of the Wave object to be added to the simulation and allows to combine waves together by adding
  * its amplitudes together.
+ *
  * @author CihaoZhang
  */
 public class WaveGenerator {

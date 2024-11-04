@@ -1,7 +1,6 @@
 package edu.vanier.fxwavegenerationsimulator.controllers;
 
 import edu.vanier.fxwavegenerationsimulator.exceptions.ChosenFileIsDirectoryException;
-import edu.vanier.fxwavegenerationsimulator.exceptions.DataFileNotFoundException;
 import edu.vanier.fxwavegenerationsimulator.models.Wave;
 import edu.vanier.fxwavegenerationsimulator.models.WaveSimulationDisplay;
 import io.fair_acc.chartfx.XYChart;
@@ -15,18 +14,14 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.sound.sampled.LineUnavailableException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Map;
 
-import static edu.vanier.fxwavegenerationsimulator.controllers.JsonDataController.importWaveSimulation;
 import static edu.vanier.fxwavegenerationsimulator.enums.WaveTypes.SIN;
 
 /**
@@ -144,12 +139,6 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
             try {
                 addedWavesTableView.getItems().add(newWave);
                 waveSimulationController.addWave(newWave);
-//                try {
-//                    soundController.addWave(newWave);
-//                    System.out.println("TBC");
-//                } catch (LineUnavailableException | IOException ex) {
-//                    throw new RuntimeException(ex);
-//                }
             } catch (Exception e) {
                 logger.error("Error adding wave: " + e.getMessage());
                 showAlert("Error", "Error adding wave: " + e.getMessage());

@@ -13,9 +13,6 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
-
-import static edu.vanier.fxwavegenerationsimulator.controllers.MainAppFXMLController.waveSimulationController;
 
 /**
  *  JavaFX controller class for the dialog box.
