@@ -1,11 +1,16 @@
 package edu.vanier.fxwavegenerationsimulator.controllers;
 
+import edu.vanier.fxwavegenerationsimulator.db.DBConnector;
 import edu.vanier.fxwavegenerationsimulator.enums.WaveTypes;
 import edu.vanier.fxwavegenerationsimulator.models.Color;
 import edu.vanier.fxwavegenerationsimulator.models.Wave;
 import edu.vanier.fxwavegenerationsimulator.models.WaveGenerator;
 import edu.vanier.fxwavegenerationsimulator.models.WaveSimulationDisplay;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.*;
 
 /**
@@ -16,7 +21,7 @@ import java.util.*;
  *
  * @author Qian Qian
  */
-public class WaveSimulationController {
+public class WaveSimulationController extends DBConnector {
     /**
      * The default sample count of the wave simulation.
      */
@@ -112,6 +117,7 @@ public class WaveSimulationController {
     public void addWave(Wave wave) {
         this.waves.add(wave);
         waveGenerator.addWave(wave);
+
     }
 
     /**
@@ -128,7 +134,6 @@ public class WaveSimulationController {
             dataPointsCombined[i] = waveGenerator.combineWaves(x, milliseconds / 1000.0);
         }
         dataPoints.put(combinedWave, dataPointsCombined);
-
         for (Wave wave : waves) {
             double[] dataPointsWave = new double[sampleCount];
             for (int i = 0; i < sampleCount; i++) {
@@ -175,6 +180,121 @@ public class WaveSimulationController {
     public void step(int milliseconds) {
         this.milliseconds += milliseconds;
         simulate();
+    }
+    public void addWaveDB(Wave wave) {
+        String sql = String.format(
+                "INSERT INTO %s (%s, %s, %s, %s, %s) VALUES (?, ?, ?, ?, ?)", "Wave", "waveType", "frequency",
+                "amplitude", "data", "color");
+
+        try {
+            Connection conn = Connector("wave.db");
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setString(1, wave.getWaveType().toString());
+            stmt.setInt(2, wave.getFrequency());
+            stmt.setDouble(3, wave.getAmplitude());
+
+            stmt.setString(4, getDataPoints());
+            stmt.setString(5, wave.getColor().toString());
+            stmt.executeUpdate(sql);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void getWavesDB() {
+        String sql = String.format("SELECT * FROM %s", "Wave");
+        try {
+            Connection conn = Connector("wave.db");
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+            while (rs.next()) {
+                String waveType = rs.getString("waveType");
+                int frequency = rs.getInt("frequency");
+                double amplitude = rs.getDouble("amplitude");
+                String color = rs.getString("color");
+                // Find the 3 rgb values from color
+                Color waveColor = new Color(Integer.parseInt(color.substring(0, 3)), Integer.parseInt(color.substring(3, 6)), Integer.parseInt(color.substring(6, 9)));
+
+                WaveTypes type = switch (waveType) {
+                    case "SIN" -> WaveTypes.SIN;
+                    case "COS" -> WaveTypes.COS;
+                    default -> throw new IllegalArgumentException("Invalid wave type: " + waveType);
+                };
+
+                Wave wave = new Wave(type, frequency, amplitude, waveColor);
+                addWave(wave);
+
+                String data = rs.getString("data");
+                HashMap<Wave, double[]> dataPoints = new HashMap<>();
+                for (String s : data.split(",")) {
+
+                }
+                //TODO
+//                waveSimulationDisplay.update(data, milliseconds);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void clearWavesDB(Wave wave) {
+        String sql = String.format("DELETE FROM %s WHERE %s = ?", "Wave", "color");
+        try {
+            Connection conn = Connector("wave.db");
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setString(1, wave.getColor().toString());
+            stmt.executeUpdate(sql);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void updateWavesDB(Wave wave) {
+        String sql = String.format("UPDATE %s SET %s = ?, %s = ?, %s = ?, %s = ?, %s = ? WHERE %s = ?", "Wave",
+                "waveType", "frequency", "amplitude", "data", "color", "color");
+        try {
+            Connection conn = Connector("wave.db");
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setString(1, wave.getWaveType().toString());
+            stmt.setInt(2, wave.getFrequency());
+            stmt.setDouble(3, wave.getAmplitude());
+            stmt.setString(4, getDataPoints());
+            stmt.setString(5, wave.getColor().toString());
+            stmt.setString(6, wave.getColor().toString());
+            stmt.executeUpdate(sql);
+        } catch (Exception e) {
+            e.printStackTrace();}
+    }
+
+
+    public String getDataPoints() {
+        double[] dataPointsWave;
+        Map<Wave, double[]> dataPoints = new HashMap<>();
+
+        double[] dataPointsCombined = new double[sampleCount];
+        double gap = totalLength / sampleCount;
+        for (int i = 0; i < sampleCount; i++) {
+            double x = i * gap;
+            dataPointsCombined[i] = waveGenerator.combineWaves(x, milliseconds / 1000.0);
+        }
+        dataPoints.put(combinedWave, dataPointsCombined);
+
+        for (Wave wave : waves) {
+            dataPointsWave = new double[sampleCount];
+            for (int i = 0; i < sampleCount; i++) {
+                double x = i * gap;
+                dataPointsWave[i] = wave.amplitude(x, milliseconds / 1000.0);
+            }
+            dataPoints.put(wave, dataPointsWave);
+        }
+        String dataPointsString = "";
+        for (Map.Entry<Wave, double[]> entry : dataPoints.entrySet()) {
+            for (int i = 0; i < sampleCount; i++) {
+                dataPointsString += entry.getValue()[i];
+            }
+        }
+
+        return dataPointsString;
     }
 
     public List<Wave> getWaves() {
