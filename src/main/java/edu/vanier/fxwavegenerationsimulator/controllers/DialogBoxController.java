@@ -11,7 +11,9 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 import static edu.vanier.fxwavegenerationsimulator.controllers.MainAppFXMLController.waveSimulationController;
 
@@ -26,15 +28,16 @@ public class DialogBoxController extends Stage {
     /**
      * The display method to show the dialog box.
      * This isn't done in fxml because it is handled differently to be imported into the AddedWaves Tableview.
-     * @param primaryStage the primary stage
      */
-    public void showDialog (Stage primaryStage) {
+    public DialogBoxController () {
         // Create a grid pane
         GridPane gridPane = new GridPane();
         gridPane.setAlignment(Pos.CENTER);
         gridPane.setHgap(10);
         gridPane.setVgap(10);
         gridPane.setPadding(new Insets(25, 25, 25, 25));
+
+        initModality(Modality.APPLICATION_MODAL);
 
         // Create labels and text fields
         Label typeLabel = new Label("Type:");
@@ -80,11 +83,26 @@ public class DialogBoxController extends Stage {
 
         // Create a scene and add the grid pane to it
         Scene scene = new Scene(gridPane, 300, 250);
-        primaryStage.setScene(scene);
-        primaryStage.show();
+        this.setScene(scene);
 
         // Add event handlers
         addButton.setOnAction(e -> {
+            if (frequencyField.getText().isEmpty() || amplitudeField.getText().isEmpty()) {
+                MainAppFXMLController.showAlert("Error", "Please enter a frequency and amplitude.");
+            }
+
+            if ((Double.parseDouble(amplitudeField.getText()) != 1 && Double.parseDouble(amplitudeField.getText()) != -1)) {
+            MainAppFXMLController.showAlert("Error", "Amplitude must be 1 or -1.");
+            }
+
+            if (Double.parseDouble(frequencyField.getText()) <= 0) {
+            MainAppFXMLController.showAlert("Error", "Frequency must be greater than 0.");
+            }
+
+            if (frequencyField.getText().matches("[a-zA-Z]+") || amplitudeField.getText().matches("[a-zA-Z]+")) {
+            MainAppFXMLController.showAlert("Error", "Frequency and amplitude must be numbers.");
+            }
+
             if (sinCheckBox.isSelected()) {
                 wave = new Wave(WaveTypes.SIN, Integer.parseInt(frequencyField.getText()),
                         Double.parseDouble(amplitudeField.getText()));
@@ -94,13 +112,13 @@ public class DialogBoxController extends Stage {
                         Double.parseDouble(amplitudeField.getText()));
                 System.out.println("A cos wave has been added.");
             }
-            waveSimulationController.addWave(wave);
-
-            primaryStage.hide();
+            this.hide();
         });
         cancelButton.setOnAction(e -> {
-            primaryStage.hide();
+            this.hide();
         });
+
+        wave = null;
     }
 
     /**
