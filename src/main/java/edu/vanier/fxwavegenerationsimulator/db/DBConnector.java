@@ -4,6 +4,11 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
 
+/**
+ * Database Connector Class that handles the connecting and locating of the database to the JavaFX Application.
+ *
+ * @author CihaoZhang
+ */
 public class DBConnector {
 
     public Connection Connector(String database) {

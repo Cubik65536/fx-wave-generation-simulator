@@ -198,6 +198,12 @@ public class WaveSimulationController extends DBConnector {
         this.milliseconds += milliseconds;
         simulate();
     }
+
+    /**
+     * Adding the wave to the database, which retrieves all parameters (Wave, waveType, frequency, amplitude and color)
+     * and the related data points.
+     * @param wave a wave object
+     */
     public void addWaveDB(Wave wave) {
         String sql = String.format(
                 "INSERT INTO %s (%s, %s, %s, %s, %s) VALUES (?, ?, ?, ?, ?)", "Wave", "waveType", "frequency",
@@ -218,6 +224,10 @@ public class WaveSimulationController extends DBConnector {
         }
     }
 
+    /**
+     * Retrieves the wave to the database, which puts all parameters (Wave, waveType, frequency, amplitude and color)
+     * and relaed data points as a resultSet
+     */
     public void getWavesDB() {
         String sql = String.format("SELECT * FROM %s", "Wave");
         try {
@@ -254,6 +264,10 @@ public class WaveSimulationController extends DBConnector {
         }
     }
 
+    /**
+     * Removes the wave based on a unique modifier color in the database.
+     * @param wave
+     */
     public void clearWavesDB(Wave wave) {
         String sql = String.format("DELETE FROM %s WHERE %s = ?", "Wave", "color");
         try {
@@ -266,6 +280,10 @@ public class WaveSimulationController extends DBConnector {
         }
     }
 
+    /**
+     * Updates pre-existing waves in the database.
+     * @param wave
+     */
     public void updateWavesDB(Wave wave) {
         String sql = String.format("UPDATE %s SET %s = ?, %s = ?, %s = ?, %s = ?, %s = ? WHERE %s = ?", "Wave",
                 "waveType", "frequency", "amplitude", "data", "color", "color");
