@@ -80,15 +80,27 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
     @FXML
     private AnchorPane chartPane;
 
+    @FXML
+    private RadioButton audioOffButton;
+
+    @FXML
+    private RadioButton audioOnButton;
+
     private XYChart chart;
 
     @FXML
     public void initialize() {
         logger.info("Initializing MainAppController...");
-
         // Initialize ComboBox with presets
         // TO-DO: Add & Load Presets : Build #3
         presetComboBox.getItems().addAll("Pure Sin", "Square Wave", "Triangle Wave", "Sawtooth Wave");
+
+        // Use ToggleGroup to ensure only one audio button is selected at a time
+        ToggleGroup audioToggleGroup = new ToggleGroup();
+        audioOffButton.setToggleGroup(audioToggleGroup);
+        audioOnButton.setToggleGroup(audioToggleGroup);
+        // Make sure audio is off by default
+        audioOffButton.setSelected(true);
 
         // Initialize TableView columns
         typeColumn.setCellValueFactory(new PropertyValueFactory<>("waveType"));

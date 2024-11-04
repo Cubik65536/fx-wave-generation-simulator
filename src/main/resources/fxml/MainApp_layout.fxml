@@ -26,8 +26,8 @@
                   <Label text="Audio:" />
                   <HBox alignment="TOP_CENTER" prefHeight="100.0" prefWidth="200.0">
                      <children>
-                        <RadioButton fx:id="OffButton" mnemonicParsing="false" prefHeight="18.0" prefWidth="60.0" text="Off" />
-                        <RadioButton fx:id="OnButton" mnemonicParsing="false" prefHeight="18.0" prefWidth="50.0" selected="true" text="On" />
+                        <RadioButton fx:id="audioOffButton" mnemonicParsing="false" prefHeight="18.0" prefWidth="60.0" text="Off" />
+                        <RadioButton fx:id="audioOnButton" mnemonicParsing="false" prefHeight="18.0" prefWidth="50.0" selected="true" text="On" />
                      </children>
                   </HBox>
                </children></VBox>
