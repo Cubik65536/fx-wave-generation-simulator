@@ -69,6 +69,18 @@ public class Color {
         return blue;
     }
 
+    public void setRed(int red) {
+        this.red = red;
+    }
+
+    public void setGreen(int green) {
+        this.green = green;
+    }
+
+    public void setBlue(int blue) {
+        this.blue = blue;
+    }
+
     /**
      * Get the color value in the format of (R, G, B).
      * @return the color value in the format of (R, G, B).
