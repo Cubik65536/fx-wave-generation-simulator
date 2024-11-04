@@ -57,9 +57,6 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
     private Button pauseButton;
 
     @FXML
-    private Slider volumeSlider;
-
-    @FXML
     private Button stepButton;
 
     @FXML
@@ -93,8 +90,6 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
         // TO-DO: Add & Load Presets : Build #3
         presetComboBox.getItems().addAll("Pure Sin", "Square Wave", "Triangle Wave", "Sawtooth Wave");
 
-        // Initialize volume slider
-        volumeSlider.setValue(50);
         // Initialize TableView columns
         typeColumn.setCellValueFactory(new PropertyValueFactory<>("waveType"));
         frequencyColumn.setCellValueFactory(new PropertyValueFactory<>("frequency"));
