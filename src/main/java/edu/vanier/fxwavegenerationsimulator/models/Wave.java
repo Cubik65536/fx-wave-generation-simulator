@@ -37,15 +37,7 @@ public class Wave {
      * @throws IllegalArgumentException If the amplitude is not between -1 and 1.
      */
     public Wave(WaveTypes waveType, int frequency, double amplitude) throws IllegalArgumentException {
-        if (amplitude < -1 || amplitude > 1) {
-            throw new IllegalArgumentException("Amplitude must be between -1 and 1.");
-        }
-
-        this.waveType = waveType;
-        this.frequency = frequency;
-        this.amplitude = amplitude;
-
-        color = new Color();
+        this(waveType, frequency, amplitude, new Color());
     }
 
     /**
@@ -57,8 +49,13 @@ public class Wave {
      * @throws IllegalArgumentException If the amplitude is not between -1 and 1.
      */
     public Wave(WaveTypes waveType, int frequency, double amplitude, Color color) throws IllegalArgumentException {
-        if (amplitude < -1 || amplitude > 1) {
-            throw new IllegalArgumentException("Amplitude must be between -1 and 1.");
+        if (waveType != WaveTypes.DUMMY || frequency != -1) {
+            if (amplitude < -1 || amplitude > 1) {
+                throw new IllegalArgumentException("Amplitude must be between -1 and 1.");
+            }
+            if (frequency <= 0) {
+                throw new IllegalArgumentException("Frequency must be greater than 0.");
+            }
         }
 
         this.waveType = waveType;
@@ -91,6 +88,7 @@ public class Wave {
         return amplitude * switch (waveType) {
             case SIN -> Math.sin(phase);
             case COS -> Math.cos(phase);
+            case DUMMY -> 0;
         };
     }
 
@@ -106,11 +104,13 @@ public class Wave {
      * Change the type of the wave.
      * If the current wave type is SIN, change it to COS.
      * If the current wave type is COS, change it to SIN.
+     * If it is a DUMMY wave, it should stay as a DUMMY wave.
      */
     public void switchWaveType() {
         this.waveType = switch (waveType) {
             case SIN -> WaveTypes.COS;
             case COS -> WaveTypes.SIN;
+            default -> waveType;
         };
     }
 
