@@ -1,5 +1,6 @@
 package edu.vanier.fxwavegenerationsimulator.controllers;
 
+import edu.vanier.fxwavegenerationsimulator.enums.WaveSimulationStatus;
 import edu.vanier.fxwavegenerationsimulator.enums.WaveTypes;
 import edu.vanier.fxwavegenerationsimulator.models.Color;
 import edu.vanier.fxwavegenerationsimulator.models.Wave;
@@ -29,6 +30,11 @@ public class WaveSimulationController {
      * The dummy wave object that represents the combined wave of all waves in the simulation.
      */
     private static final Wave combinedWave = new Wave(WaveTypes.SIN, 0, 0, new Color(0, 0, 0));
+
+    /**
+     * The status of the wave simulation (e.g. playing, paused, stopped).
+     */
+    private WaveSimulationStatus simulationStatus;
 
     /**
      * List that contains all Wave objects.
@@ -96,6 +102,7 @@ public class WaveSimulationController {
      * @param sampleCount The number of sample (data points) to be generated used to generate the wave graph.
      */
     public WaveSimulationController(double totalLength, int sampleCount, WaveSimulationDisplay waveSimulationDisplay) {
+        this.simulationStatus = WaveSimulationStatus.STOPPED;
         this.waves = new ArrayList<>();
         this.milliseconds = 0;
         this.timer = new Timer();
@@ -150,6 +157,9 @@ public class WaveSimulationController {
         }
         this.timer = new Timer();
         this.timer.scheduleAtFixedRate(new UpateTask(), 0, DEFAULT_UPDATE_INTERVAL);
+
+        // Set the simulation status to playing.
+        this.simulationStatus = WaveSimulationStatus.PLAYING;
     }
 
     /**
@@ -157,6 +167,9 @@ public class WaveSimulationController {
      */
     public void pause() {
         this.timer.cancel();
+
+        // Set the simulation status to paused.
+        this.simulationStatus = WaveSimulationStatus.PAUSED;
     }
 
     /**
@@ -165,6 +178,9 @@ public class WaveSimulationController {
     public void stop() {
         this.timer.cancel();
         this.milliseconds = 0;
+
+        // Set the simulation status to stopped.
+        this.simulationStatus = WaveSimulationStatus.STOPPED;
     }
 
     /**
@@ -179,5 +195,9 @@ public class WaveSimulationController {
 
     public List<Wave> getWaves() {
         return waves;
+    }
+
+    public WaveSimulationStatus getSimulationStatus() {
+        return simulationStatus;
     }
 }
