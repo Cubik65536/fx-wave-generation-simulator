@@ -1,5 +1,6 @@
 package edu.vanier.fxwavegenerationsimulator.controllers;
 
+import edu.vanier.fxwavegenerationsimulator.MainApp;
 import edu.vanier.fxwavegenerationsimulator.enums.WaveSimulationStatus;
 import edu.vanier.fxwavegenerationsimulator.exceptions.ChosenFileIsDirectoryException;
 import edu.vanier.fxwavegenerationsimulator.models.Wave;
@@ -29,10 +30,10 @@ import static edu.vanier.fxwavegenerationsimulator.enums.WaveTypes.SIN;
 /**
  *  FXML controller class for the main application.
  *  This class handles all UI elements in the main application.
- *  Requires the WaveSimulationController class to be initialized. (TO-DO)
+ *  Requires the WaveSimulationController class to be initialized.
+ *
  *  @author CihaoZhang
  */
-
 public class MainAppFXMLController implements WaveSimulationDisplay {
     private final static Logger logger = LoggerFactory.getLogger(MainAppFXMLController.class);
 
@@ -189,8 +190,10 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
         showAnalyzerCheckBox.selectedProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue) {
                 // Show the Wave Analyzer
+                MainApp.showWaveAnalyzer();
             } else {
                 // Hide the Wave Analyzer
+                MainApp.hideWaveAnalyzer();
             }
         });
 
@@ -317,5 +320,15 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
             // Add the dataset to the chart
             Platform.runLater(() -> chart.getDatasets().add(dataSet));
         }
+    }
+
+    /**
+     * A getter for the "Show Analyzer" CheckBox, so it can be
+     * automatically unchecked elsewhere when the Analyzer Window is closed.
+     * @return the object of the "Show Analyzer" CheckBox
+     * @author Qian Qian
+     */
+    public CheckBox getShowAnalyzerCheckBox() {
+        return showAnalyzerCheckBox;
     }
 }
