@@ -10,3 +10,5 @@ _README_ working in progress...
 - Generate Audio In-Real-Time based on Waves (frequency and amplitude):
     - Based on https://stackoverflow.com/questions/7782721/java-raw-audio-output/7782749#7782749 to generate audio with `Clip` class.
     - and used https://github.com/Cubik65536/BeeperFX for making a prototype that works with our Wave format.
+- https://www.youtube.com/watch?v=NWcFTTbKbLs - Setting up the database and connecting to JavaFX
+- https://github.com/fair-acc/chart-fx - Setting up ChartFX import and set axis
