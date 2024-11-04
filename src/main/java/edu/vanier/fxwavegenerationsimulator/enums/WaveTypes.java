@@ -6,6 +6,7 @@ package edu.vanier.fxwavegenerationsimulator.enums;
  * @author Qian Qian
  */
 public enum WaveTypes {
+    DUMMY,  // The dummy value for the dummy object for the combined wave
     SIN,
     COS
 }
