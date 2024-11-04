@@ -29,7 +29,7 @@ public class WaveSimulationController {
     /**
      * The dummy wave object that represents the combined wave of all waves in the simulation.
      */
-    private static final Wave combinedWave = new Wave(WaveTypes.SIN, 0, 0, new Color(0, 0, 0));
+    private static final Wave combinedWave = new Wave(WaveTypes.DUMMY, -1, 0, new Color(0, 0, 0));
 
     /**
      * The status of the wave simulation (e.g. playing, paused, stopped).
