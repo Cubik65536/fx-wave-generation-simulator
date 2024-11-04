@@ -231,13 +231,13 @@ public class WaveSimulationController extends DBConnector {
      * Retrieves the wave to the database, which puts all parameters (Wave, waveType, frequency, amplitude and color)
      * and related data points as a resultSet
      */
-    public void getWavesDB(String simulationName, String waveName) {
+    public void getWavesDB(String simulationName) {
         String sql = String.format("SELECT * FROM %s", "Wave");
         try {
             Connection conn = Connector("wave.db");
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
-            if (rs.getString("Name").equals(simulationName) && rs.getString("waveName").equals(waveName)) {
+            if (rs.getString("Name").equals(simulationName)) {
                 while (rs.next()) {
                     String waveType = rs.getString("waveType");
                     int frequency = rs.getInt("frequency");
