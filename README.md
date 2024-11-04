@@ -12,3 +12,4 @@ _README_ working in progress...
     - and used https://github.com/Cubik65536/BeeperFX for making a prototype that works with our Wave format.
 - https://www.youtube.com/watch?v=NWcFTTbKbLs - Setting up the database and connecting to JavaFX
 - https://github.com/fair-acc/chart-fx - Setting up ChartFX import and set axis
+- https://stackoverflow.com/a/13729491 - How to monitor the event when a CheckBox is checked/unchecked

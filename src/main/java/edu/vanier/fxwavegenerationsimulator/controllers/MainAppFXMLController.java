@@ -88,6 +88,9 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
     @FXML
     private RadioButton audioOnButton;
 
+    @FXML
+    private CheckBox showAnalyzerCheckBox;
+
     private XYChart chart;
 
     /**
@@ -133,15 +136,6 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
         amplitudeColumn.setCellValueFactory(new PropertyValueFactory<>("amplitude"));
         // The use of currentAmplitudeColumn is part of another build, as it requires Wave Generator to clash multiple waves.
 //        currentAmplitudeColumn.setCellValueFactory(new PropertyValueFactory<>("currentAmplitude"));
-
-        Wave wave1 = new Wave(SIN, 1, 1.0);
-        Wave wave2 = new Wave(SIN, 1, -1.0);
-//        try {
-//            addWave(wave1);
-//            addWave(wave2);
-//        } catch (LineUnavailableException | IOException e) {
-//            throw new RuntimeException(e);
-//        }
 
         importButton.setOnAction(this::handleImportButton);
         exportButton.setOnAction(this::handleExportButton);
@@ -190,6 +184,14 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
         // Stop sound when the audioOffButton is selected
         audioOffButton.setOnAction(event -> {
             soundController.stop();
+        });
+
+        showAnalyzerCheckBox.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue) {
+                // Show the Wave Analyzer
+            } else {
+                // Hide the Wave Analyzer
+            }
         });
 
         // Set up the chart for wave visualization
