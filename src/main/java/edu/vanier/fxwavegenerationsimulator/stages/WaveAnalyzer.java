@@ -25,7 +25,7 @@ public class WaveAnalyzer extends Stage {
         // Make sure that the Window header only has a "close" button.
         this.initStyle(StageStyle.UTILITY);
         // Set the scene to the loaded root.
-        this.setScene(new Scene(root, 600, 400));
+        this.setScene(new Scene(root, 800, 600));
         this.setOnHidden(event -> {
             // Automatically Uncheck the "Show Analyzer" CheckBox when the Window is closed.
             toggleCheckBox.setSelected(false);
