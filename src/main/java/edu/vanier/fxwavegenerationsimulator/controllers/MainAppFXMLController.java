@@ -25,8 +25,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Map;
 
-import static edu.vanier.fxwavegenerationsimulator.enums.WaveTypes.SIN;
-
 /**
  *  FXML controller class for the main application.
  *  This class handles all UI elements in the main application.
@@ -41,6 +39,11 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
     private SoundController soundController;
 
     private Wave wave;
+
+    /**
+     * The analyzer window controller that controls the window that shows data about playing sound.
+     */
+    private AnalyzerFXMLController analyzerFXMLController;
 
     public DialogBoxController dialogBoxController;
 
@@ -95,6 +98,15 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
     private XYChart chart;
 
     /**
+     * The setter for the analyzerFXMLController, so the MainApp can pass in the controller
+     * so the current Main App Controller can control the Analyzer Window.
+     * @param analyzerFXMLController the controller of the Analyzer Window
+     */
+    public void setAnalyzerFXMLController(AnalyzerFXMLController analyzerFXMLController) {
+        this.analyzerFXMLController = analyzerFXMLController;
+    }
+
+    /**
      * Add the new wave to ALL required places (simulation controller, audio controller, table view, etc.)
      * @param newWave the new wave to be added
      * @author Qian Qian
@@ -144,9 +156,17 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
         try {
             playButton.setOnAction(event -> {
                 waveSimulationController.start();
+                if (analyzerFXMLController != null) {
+                    // Update the sound data on the chart
+                    analyzerFXMLController.start();
+                }
             });
             pauseButton.setOnAction(event -> {
                 waveSimulationController.pause();
+                if (analyzerFXMLController != null) {
+                    // Stop updating the sound data on the chart
+                    analyzerFXMLController.stop();
+                }
 
                 // Stop sound when the simulation is paused
                 soundController.stop();
@@ -154,7 +174,12 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
                 audioOffButton.setSelected(true);
             });
             stepButton.setOnAction(event -> {
-                waveSimulationController.step(100);
+                int step = 100;
+                waveSimulationController.step(step);
+                if (analyzerFXMLController != null) {
+                    // Update the sound data on the chart
+                    analyzerFXMLController.step(step);
+                }
             });
         } catch (Exception e) {
             logger.error("Error initializing wave simulation: {}", e.getMessage());
@@ -333,5 +358,15 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
      */
     public CheckBox getShowAnalyzerCheckBox() {
         return showAnalyzerCheckBox;
+    }
+
+    /**
+     * A getter for the Sound Controller so that the Wave Analyzer can access it
+     * to get sound data to show.
+     * @return the Sound Controller object that is active in this simulation
+     * @author Qian Qian
+     */
+    public SoundController getSoundController() {
+        return soundController;
     }
 }

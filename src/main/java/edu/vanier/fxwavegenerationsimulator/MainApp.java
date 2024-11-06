@@ -41,8 +41,13 @@ public class MainApp extends Application {
             primaryStage.setScene(scene);
 
             // Load and initialize the analyzer.
-            Parent analyzerRoot = loadFXML(ANALYZER_LAYOUT, new AnalyzerFXMLController());
+            AnalyzerFXMLController analyzerFXMLController = new AnalyzerFXMLController();
+            Parent analyzerRoot = loadFXML(ANALYZER_LAYOUT, analyzerFXMLController);
             waveAnalyzer = new WaveAnalyzer(analyzerRoot, primaryStage, mainAppFXMLController.getShowAnalyzerCheckBox());
+            analyzerFXMLController.setSoundController(
+                    mainAppFXMLController.getSoundController()
+            );
+            mainAppFXMLController.setAnalyzerFXMLController(analyzerFXMLController);
 
             // Put this appliation's main window on top of other already-opened windows
             // upon launching the app.

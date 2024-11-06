@@ -33,12 +33,14 @@ public class SoundController {
     /**
      * The audio data clip to be played.
      */
-    Clip clip;
+    private Clip clip;
 
     /**
      * Buffer to store the audio data.
+     * Each index in the buffer represents precisely one sample of the sound
+     * (e.g 1/44100 second of sound).
      */
-    byte[] buffer;
+    private byte[] buffer;
 
     public SoundController() throws LineUnavailableException, IOException {
         waves = new ArrayList<>();
@@ -118,6 +120,7 @@ public class SoundController {
         if (clip != null) {
             // The sound will be played infinitely.
             clip.loop(Clip.LOOP_CONTINUOUSLY);
+            System.out.println("Level: " + clip.getLevel());
         }
     }
 
@@ -128,5 +131,13 @@ public class SoundController {
         if (clip != null) {
             clip.stop();
         }
+    }
+
+    /**
+     * The getter for the buffer array, so other classes (like the sound analyzer) can fetch the data.
+     * @return the buffer array that contains the sound data, where each index represents 1/44100 second of sound.
+     */
+    public byte[] getBuffer() {
+        return buffer;
     }
 }
