@@ -164,11 +164,14 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
         addWave.setOnAction(event -> {
             dialogBoxController = new DialogBoxController();
             dialogBoxController.showAndWait();
-            Wave newWave = dialogBoxController.getWave();
-            try {
-                addWave(newWave);
-            } catch (LineUnavailableException | IOException e) {
-                throw new RuntimeException(e);
+            if (!dialogBoxController.isCancelled()) {
+                // Only read new wave data if the add wave dialog is not closed by cancel
+                Wave newWave = dialogBoxController.getWave();
+                try {
+                    addWave(newWave);
+                } catch (LineUnavailableException | IOException e) {
+                    throw new RuntimeException(e);
+                }
             }
         });
 

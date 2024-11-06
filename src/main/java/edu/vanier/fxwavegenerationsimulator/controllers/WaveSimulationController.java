@@ -125,7 +125,6 @@ public class WaveSimulationController extends DBConnector {
     public void addWave(Wave wave) {
         this.waves.add(wave);
         waveGenerator.addWave(wave);
-
     }
 
     /**
