@@ -119,6 +119,9 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
         // Initialize ComboBox with presets
         // TO-DO: Add & Load Presets : Build #3
         presetComboBox.getItems().addAll("Pure Sin", "Square Wave", "Triangle Wave", "Sawtooth Wave");
+        waveSimulationController.loadPresets();
+        presetComboBox.setOnAction(this::handlePresetComboBox);
+
 
         // Use ToggleGroup to ensure only one audio button is selected at a time
         ToggleGroup audioToggleGroup = new ToggleGroup();
@@ -286,6 +289,49 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
         } catch (IOException e) {
             logger.error("An error occurred while exporting wave data: " + e.getMessage());
             showAlert("Error", "An error occurred while exporting wave data: " + e.getMessage());
+        }
+    }
+
+    public void handlePresetComboBox(ActionEvent event) {
+        try {
+        String preset = presetComboBox.getSelectionModel().getSelectedItem();
+        switch (preset) {
+            case "Pure Sin":
+                waveSimulationController.getWavesDB("Pure Sine");
+                for (Wave wave : waveSimulationController.getWaves()) {
+//                    addWave(wave);
+                    addedWavesTableView.getItems().add(wave);
+                }
+                waveSimulationController.simulate();
+                break;
+            case "Square Wave":
+                waveSimulationController.getWavesDB("Square Wave");
+                for (Wave wave : waveSimulationController.getWaves()) {
+//                    addWave(wave);
+                    addedWavesTableView.getItems().add(wave);
+                }
+                waveSimulationController.simulate();
+                break;
+            case "Sawtooth Wave":
+                waveSimulationController.getWavesDB("Sawtooth Wave");
+                for (Wave wave : waveSimulationController.getWaves()) {
+//                    addWave(wave);
+                    addedWavesTableView.getItems().add(wave);
+                }
+                waveSimulationController.simulate();
+                break;
+            case "Triangle Wave":
+                waveSimulationController.getWavesDB("Triangle Wave");
+                for (Wave wave : waveSimulationController.getWaves()) {
+//                    addWave(wave);
+                    addedWavesTableView.getItems().add(wave);
+                }
+                waveSimulationController.simulate();
+                break;
+            }
+        } catch (Exception e) {
+            System.err.println("An unexpected error occurred: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
