@@ -9,11 +9,11 @@
       <HBox prefHeight="100.0" prefWidth="200.0">
          <children>
             <Separator orientation="VERTICAL" prefHeight="200.0" />
-            <VBox>
+            <VBox alignment="BOTTOM_CENTER">
                <children>
-                  <AnchorPane fx:id="volumeChartPane" prefHeight="490.0" prefWidth="194.0" />
+                  <AnchorPane fx:id="volumeChartPane" />
                   <Separator prefHeight="0.0" prefWidth="194.0" />
-                  <VBox alignment="CENTER" prefHeight="130.0" prefWidth="194.0">
+                  <VBox alignment="CENTER" maxHeight="150.0" prefHeight="130.0">
                      <children>
                         <Label text="VOLUME">
                            <font>
