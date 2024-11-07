@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1">
+   <right>
+      <HBox prefHeight="100.0" prefWidth="200.0">
+         <children>
+            <Separator orientation="VERTICAL" prefHeight="200.0" />
+            <VBox alignment="BOTTOM_CENTER">
+               <children>
+                  <AnchorPane fx:id="volumeChartPane" />
+                  <Separator prefHeight="0.0" prefWidth="194.0" />
+                  <VBox alignment="CENTER" maxHeight="150.0" prefHeight="130.0">
+                     <children>
+                        <Label text="VOLUME">
+                           <font>
+                              <Font size="16.0" />
+                           </font>
+                        </Label>
+                        <Label fx:id="volumeLabel" text="0 / 127">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </VBox>
+               </children>
+            </VBox>
+         </children>
+      </HBox>
+   </right>
+   <center>
+      <AnchorPane fx:id="analyzerGraphPane" prefHeight="450.0" prefWidth="600.0" />
+   </center>
+</BorderPane>
