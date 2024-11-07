@@ -5,6 +5,7 @@ import edu.vanier.fxwavegenerationsimulator.models.Wave;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.sound.sampled.*;
@@ -42,6 +43,13 @@ public class SoundController {
      */
     private byte[] buffer;
 
+    /**
+     * Buffer to store the audio data for each frequency.
+     * Each index in the buffer represents precisely one sample of the sound
+     * (e.g 1/44100 second of sound).
+     */
+    private byte[][] frequencyBuffer;
+
     public SoundController() throws LineUnavailableException, IOException {
         waves = new ArrayList<>();
         this.clip = AudioSystem.getClip();
@@ -67,12 +75,20 @@ public class SoundController {
      */
     private void refreshBuffer() {
         buffer = new byte[clip.getBufferSize()];
+        if (!waves.isEmpty()) {
+            frequencyBuffer = new byte[clip.getBufferSize()][waves.getLast().getFrequency() + 1];
+        } else {
+            frequencyBuffer = new byte[clip.getBufferSize()][0];
+        }
         for (int i = 0; i < buffer.length; i++) {
-            double amplitude = 0;
+            double totalAmplitude = 0;
             for (Wave wave : waves) {
-                amplitude += wave.amplitude(0, i / (double) SAMPLE_RATE);
+                double amplitude = wave.amplitude(0, i / (double) SAMPLE_RATE);
+                totalAmplitude += amplitude;
+                // Convert the amplitude from a range of -1 to 1 to a range of -127 to 127 (byte range).
+                frequencyBuffer[i][wave.getFrequency()] = Integer.valueOf((int) Math.round(amplitude * MAX_VOLUME)).byteValue();
             }
-            buffer[i] = getBufferValue(amplitude, waves.size());
+            buffer[i] = getBufferValue(totalAmplitude, waves.size());
         }
     }
 
@@ -108,6 +124,8 @@ public class SoundController {
     public void addWave(Wave wave) throws LineUnavailableException, IOException {
         // Add wave to the list.
         waves.add(wave);
+        // Always sort the waves in the list by frequency (lowest to highest).
+        waves.sort(Comparator.comparingInt(Wave::getFrequency));
         // Refresh the buffer and generate the sound.
         refreshBuffer();
         generateTone();
@@ -139,5 +157,13 @@ public class SoundController {
      */
     public byte[] getBuffer() {
         return buffer;
+    }
+
+    /**
+     * The getter for the frequency buffer array, so other classes (like the sound analyzer) can fetch the data.
+     * @return the frequency buffer array that contains the sound data for each frequency, where each index represents 1/44100 second of sound.
+     */
+    public byte[][] getFrequencyBuffer() {
+        return frequencyBuffer;
     }
 }

@@ -13,3 +13,4 @@ _README_ working in progress...
 - https://www.youtube.com/watch?v=NWcFTTbKbLs - Setting up the database and connecting to JavaFX
 - https://github.com/fair-acc/chart-fx and sample codes - Setting up ChartFX, set axis, show data, etc.
 - https://stackoverflow.com/a/13729491 - How to monitor the event when a CheckBox is checked/unchecked
+- https://en.wikipedia.org/wiki/Hearing_range - Human hearing range

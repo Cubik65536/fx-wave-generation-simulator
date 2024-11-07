@@ -53,6 +53,7 @@ public class AnalyzerFXMLController {
             if (soundController != null) {
                 // Get the sound data buffer from the controller.
                 byte[] buffer = soundController.getBuffer();
+                byte[][] frequencyBuffer = soundController.getFrequencyBuffer();
 
                 // As each index of the buffer represents 1/44100 second,
                 // we convert the current time in milliseconds to the index in the buffer
@@ -63,7 +64,7 @@ public class AnalyzerFXMLController {
                 // To prevent out of bound exception, we do the index modulo of the buffer length to get the real index.
                 byte amplitude = buffer[bufferIndex % buffer.length];
 
-                // Update the volume label and the volume chart.
+                // Update the charts.
                 Platform.runLater(() -> {
                     volumeLabel.setText(amplitude + "/127");
 
@@ -72,6 +73,23 @@ public class AnalyzerFXMLController {
                     volumeDataSet.add(0, amplitude);
                     volumeDataSet.add(1, amplitude);
                     volumeRenderer.getDatasets().set(0, volumeDataSet);
+
+                    byte[] frequencyDataAtTime = frequencyBuffer[bufferIndex % buffer.length];
+                    DefaultDataSet frequencyDataSets = new DefaultDataSet("Frequency");
+                    for (int i = 0; i < frequencyDataAtTime.length; i++) {
+                        double amplitudeForFrequency = frequencyDataAtTime[i];
+                        if (amplitudeForFrequency != 0) {
+                            frequencyDataSets.add(i, amplitudeForFrequency);
+
+                            // We add an extra 0 to the end of the data set to make the last bar visible.
+                            // This is due to a bug of the chart library.
+                            // https://github.com/fair-acc/chart-fx/issues/489
+                            if (i == frequencyDataAtTime.length - 1) {
+                                frequencyDataSets.add(i + 1, 0);
+                            }
+                        }
+                    }
+                    waveAnalyzerRenderer.getDatasets().setAll(frequencyDataSets);
                 });
             }
         }
@@ -90,6 +108,7 @@ public class AnalyzerFXMLController {
      * The chart showing the analysis of each frequency.
      */
     private XYChart waveAnalyzerChart;
+    private HistogramRenderer waveAnalyzerRenderer;
 
     /**
      * The chart showing the volume of the combined waves.
@@ -102,17 +121,26 @@ public class AnalyzerFXMLController {
         timer = new Timer();
 
         // Create the axis for the wave analyzer chart.
-        DefaultNumericAxis xAxis = new DefaultNumericAxis("Frequency");
+        // The x-axis ranges till 20000Hz, which is the maximum frequency that human can hear.
+        DefaultNumericAxis xAxis = new DefaultNumericAxis("Frequency", 0.0, 20000.0, 1000.0);
         xAxis.setAutoRangeRounding(false);
-        xAxis.setAutoRanging(true);
+        xAxis.setAutoRanging(false);
         xAxis.setUnit("Hz");
-        DefaultNumericAxis yAxis = new DefaultNumericAxis("Amplitude", null);
+        DefaultNumericAxis yAxis = new DefaultNumericAxis("Amplitude", -128.0, 128.0, 1);
         yAxis.setAutoRangeRounding(false);
-        yAxis.setAutoRanging(true);
+        yAxis.setAutoRanging(false);
+        yAxis.setUnit(null);
 
         // Create the chart for the wave analyzer.
+        waveAnalyzerRenderer = new HistogramRenderer();
+        waveAnalyzerRenderer.setDrawBars(true);
+        waveAnalyzerRenderer.setPolyLineStyle(LineStyle.NONE);
+        waveAnalyzerRenderer.setShiftBar(false);
         waveAnalyzerChart = new XYChart(xAxis, yAxis);
         waveAnalyzerChart.setTitle("Wave Analyzer");
+        waveAnalyzerChart.getRenderers().set(0, waveAnalyzerRenderer);
+        waveAnalyzerChart.getLegend().getNode().visibleProperty().set(true);
+        waveAnalyzerChart.setLegendVisible(false);
 
         analyzerGraphPane.getChildren().add(waveAnalyzerChart);
         AnchorPane.setTopAnchor(waveAnalyzerChart, 0.0);
@@ -129,12 +157,12 @@ public class AnalyzerFXMLController {
         volumeAxis.setAutoRangeRounding(false);
         volumeAxis.setAutoRanging(false);
         volumeAxis.setUnit(null);
+
         // Create the chart for the volume.
         volumeRenderer = new HistogramRenderer();
         volumeRenderer.setDrawBars(true);
         volumeRenderer.setPolyLineStyle(LineStyle.NONE);
         volumeRenderer.setShiftBar(false);
-
         volumeChart = new XYChart(volumeXAxis, volumeAxis);
         volumeChart.setTitle("Volume Chart");
         volumeChart.getRenderers().set(0, volumeRenderer);
