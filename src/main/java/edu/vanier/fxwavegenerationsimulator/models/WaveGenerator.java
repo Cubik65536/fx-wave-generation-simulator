@@ -31,6 +31,14 @@ public class WaveGenerator {
         waves.add(wave);
     }
 
+    public void clearWaves() {
+        waves.clear();
+    }
+
+    public void removeWave(Wave wave) {
+        waves.remove(wave);
+    }
+
     /**
      * Calculates the amplitude of the combined waves at a given position and time.
      * @param x the position of the wave (in meters)

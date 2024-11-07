@@ -35,7 +35,8 @@ dependencies {
     compileOnly "org.openjfx:javafx-fxml:$javafxVersion:javadoc"
     compileOnly "org.openjfx:javafx-graphics:$javafxVersion:javadoc"
 
-    // Link Logback to the project: @see: https://logback.qos.ch/ 
+    // Link Logback to the project: @see: https://logback.qos.ch/
+    implementation 'org.xerial:sqlite-jdbc:3.45.2.0'
     implementation "ch.qos.logback:logback-classic:$logbackVersion"
     implementation "ch.qos.logback:logback-core:$logbackVersion"
     implementation "com.google.code.gson:gson:$gsonVersion"

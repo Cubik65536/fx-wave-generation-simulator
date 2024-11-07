@@ -84,6 +84,9 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
     private Button addWave;
 
     @FXML
+    private Button removeWave;
+
+    @FXML
     private AnchorPane chartPane;
 
     @FXML
@@ -128,6 +131,7 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
         waveSimulationController = new WaveSimulationController(500, this);
         try {
             soundController = new SoundController();
+            waveSimulationController.loadPresets();
         } catch (LineUnavailableException | IOException e) {
             throw new RuntimeException(e);
         }
@@ -135,6 +139,8 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
         // Initialize ComboBox with presets
         // TO-DO: Add & Load Presets : Build #3
         presetComboBox.getItems().addAll("Pure Sin", "Square Wave", "Triangle Wave", "Sawtooth Wave");
+        presetComboBox.setOnAction(this::handlePresetComboBox);
+
 
         // Use ToggleGroup to ensure only one audio button is selected at a time
         ToggleGroup audioToggleGroup = new ToggleGroup();
@@ -197,6 +203,16 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
                 } catch (LineUnavailableException | IOException e) {
                     throw new RuntimeException(e);
                 }
+            }
+        });
+
+        removeWave.setOnAction(event -> {
+            Wave selectedWave = addedWavesTableView.getSelectionModel().getSelectedItem();
+            if (selectedWave != null) {
+                addedWavesTableView.getItems().remove(selectedWave);
+                waveSimulationController.removeWave(selectedWave);
+                //soundController.removeWave(selectedWave);
+                waveSimulationController.simulate();
             }
         });
 
@@ -319,6 +335,51 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
         } catch (IOException e) {
             logger.error("An error occurred while exporting wave data: " + e.getMessage());
             showAlert("Error", "An error occurred while exporting wave data: " + e.getMessage());
+        }
+    }
+
+    public void handlePresetComboBox(ActionEvent event) {
+        try {
+        String preset = presetComboBox.getSelectionModel().getSelectedItem();
+        switch (preset) {
+            case "Pure Sin":
+                waveSimulationController.getWavesDB("Pure Sine");
+                for (Wave wave : waveSimulationController.getWaves()) {
+//                    addWave(wave);
+                    addedWavesTableView.getItems().add(wave);
+                }
+                waveSimulationController.simulate();
+                waveSimulationController.clearWavesDB("Pure Sine");
+                break;
+            case "Square Wave":
+                waveSimulationController.getWavesDB("Square Wave");
+                for (Wave wave : waveSimulationController.getWaves()) {
+//                    addWave(wave);
+                    addedWavesTableView.getItems().add(wave);
+                }
+                waveSimulationController.simulate();
+                break;
+            case "Sawtooth Wave":
+                waveSimulationController.clearWaves();
+                waveSimulationController.getWavesDB("Sawtooth Wave");
+                for (Wave wave : waveSimulationController.getWaves()) {
+//                    addWave(wave);
+                    addedWavesTableView.getItems().add(wave);
+                }
+                waveSimulationController.simulate();
+                break;
+            case "Triangle Wave":
+                waveSimulationController.getWavesDB("Triangle Wave");
+                for (Wave wave : waveSimulationController.getWaves()) {
+//                    addWave(wave);
+                    addedWavesTableView.getItems().add(wave);
+                }
+                waveSimulationController.simulate();
+                break;
+            }
+        } catch (Exception e) {
+            System.err.println("An unexpected error occurred: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 

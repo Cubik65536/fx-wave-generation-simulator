@@ -87,6 +87,6 @@ public class Color {
      */
     @Override
     public String toString() {
-        return "(" + red + ", " + green + ", " + blue + ")";
+        return "(" + red + "," + green + "," + blue + ")";
     }
 }
