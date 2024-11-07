@@ -2,6 +2,9 @@ package edu.vanier.fxwavegenerationsimulator.controllers;
 
 import io.fair_acc.chartfx.XYChart;
 import io.fair_acc.chartfx.axes.spi.DefaultNumericAxis;
+import io.fair_acc.chartfx.renderer.LineStyle;
+import io.fair_acc.chartfx.renderer.spi.HistogramRenderer;
+import io.fair_acc.dataset.spi.DefaultDataSet;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
@@ -63,6 +66,12 @@ public class AnalyzerFXMLController {
                 // Update the volume label and the volume chart.
                 Platform.runLater(() -> {
                     volumeLabel.setText(amplitude + "/127");
+
+                    DefaultDataSet volumeDataSet = new DefaultDataSet("Volume");
+                    // We need to add the data to both x = 0 and x = 1 to make the bar visible.
+                    volumeDataSet.add(0, amplitude);
+                    volumeDataSet.add(1, amplitude);
+                    volumeRenderer.getDatasets().set(0, volumeDataSet);
                 });
             }
         }
@@ -86,6 +95,7 @@ public class AnalyzerFXMLController {
      * The chart showing the volume of the combined waves.
      */
     private XYChart volumeChart;
+    private HistogramRenderer volumeRenderer;
 
     @FXML
     public void initialize() {
@@ -96,10 +106,9 @@ public class AnalyzerFXMLController {
         xAxis.setAutoRangeRounding(false);
         xAxis.setAutoRanging(true);
         xAxis.setUnit("Hz");
-        DefaultNumericAxis yAxis = new DefaultNumericAxis("Amplitude");
+        DefaultNumericAxis yAxis = new DefaultNumericAxis("Amplitude", null);
         yAxis.setAutoRangeRounding(false);
         yAxis.setAutoRanging(true);
-        yAxis.setUnit("Amplitude Unit");
 
         // Create the chart for the wave analyzer.
         waveAnalyzerChart = new XYChart(xAxis, yAxis);
@@ -112,17 +121,31 @@ public class AnalyzerFXMLController {
         AnchorPane.setRightAnchor(waveAnalyzerChart, 0.0);
 
         // Create the axis for the volume chart.
-        DefaultNumericAxis volumeXAxis = new DefaultNumericAxis("", 0.0, 0.0, 5.0);
+        DefaultNumericAxis volumeXAxis = new DefaultNumericAxis("", -0.5, 0.5, 1.0);
         volumeXAxis.setAutoRangeRounding(false);
         volumeXAxis.setAutoRanging(false);
-        volumeXAxis.setUnit("Total");
+        volumeXAxis.setUnit(null);
         DefaultNumericAxis volumeAxis = new DefaultNumericAxis("Volume", -128.0, 128.0, 5.0);
         volumeAxis.setAutoRangeRounding(false);
         volumeAxis.setAutoRanging(false);
-        volumeAxis.setUnit("Amplitude Unit");
+        volumeAxis.setUnit(null);
         // Create the chart for the volume.
+        volumeRenderer = new HistogramRenderer();
+        volumeRenderer.setDrawBars(true);
+        volumeRenderer.setPolyLineStyle(LineStyle.NONE);
+        volumeRenderer.setShiftBar(false);
+
         volumeChart = new XYChart(volumeXAxis, volumeAxis);
         volumeChart.setTitle("Volume Chart");
+        volumeChart.getRenderers().set(0, volumeRenderer);
+        volumeChart.getLegend().getNode().visibleProperty().set(true);
+        volumeChart.setLegendVisible(false);
+
+        DefaultDataSet volumeDataSet = new DefaultDataSet("Volume");
+        // We need to add the data to both x = 0 and x = 1 to make the bar visible.
+        volumeDataSet.add(0, 0);
+        volumeDataSet.add(1, 0);
+        volumeRenderer.getDatasets().add(volumeDataSet);
 
         volumeChartPane.getChildren().add(volumeChart);
         AnchorPane.setTopAnchor(volumeChart, 0.0);
@@ -131,6 +154,9 @@ public class AnalyzerFXMLController {
         AnchorPane.setRightAnchor(volumeChart, 0.0);
     }
 
+    /**
+     * Start to update the data on the analyzer.
+     */
     public void start() {
         if (this.timer != null) {
             this.timer.cancel();
@@ -140,16 +166,28 @@ public class AnalyzerFXMLController {
         this.timer.scheduleAtFixedRate(new UpateTask(), 0, 1);
     }
 
+    /**
+     * Pause the updating of the data on the analyzer.
+     */
     public void pause() {
         this.timer.cancel();
     }
 
+    /**
+     * Stop the updating of the data on the analyzer (the time is also reset).
+     */
     public void stop() {
         this.timer.cancel();
         this.milliseconds = 0;
     }
 
+    /**
+     * Step the time by a given number of time.
+     * @param milliseconds the time to be skipped (in milliseconds).
+     */
     public void step(int milliseconds) {
         this.milliseconds += milliseconds;
+        // Update the data on the chart.
+        new UpateTask().run();
     }
 }
