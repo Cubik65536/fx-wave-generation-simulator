@@ -127,7 +127,16 @@ public class WaveSimulationController extends DBConnector {
     public void addWave(Wave wave) {
         this.waves.add(wave);
         waveGenerator.addWave(wave);
+    }
 
+    public void clearWaves() {
+        this.waves.clear();
+        waveGenerator.clearWaves();
+    }
+
+    public void removeWave(Wave wave) {
+        this.waves.remove(wave);
+        waveGenerator.removeWave(wave);
     }
 
     /**
@@ -214,12 +223,12 @@ public class WaveSimulationController extends DBConnector {
         try {
             Connection conn = Connector("wave.db");
             PreparedStatement stmt = conn.prepareStatement(sql);
-
+            String data = "";
             stmt.setString(1, simulationName);
             stmt.setString(2, wave.getWaveType().toString());
             stmt.setInt(3, wave.getFrequency());
             stmt.setDouble(4, wave.getAmplitude());
-            stmt.setString(5, getDataPoints());
+            stmt.setString(5, data);
             stmt.setString(6, wave.getColor().toString());
             stmt.executeUpdate();
         } catch (Exception e) {
@@ -240,13 +249,10 @@ public class WaveSimulationController extends DBConnector {
 
             while (rs.next()) {
                 if (rs.getString("Name").equals(simulationName)) {
-                System.out.println("Getting Waves");
                 String waveType = rs.getString("waveType");
                 int frequency = rs.getInt("frequency");
                 double amplitude = rs.getDouble("amplitude");
                 String color = rs.getString("color");
-                // Find the 3 rgb values from color
-                System.out.println(rs.getString("color"));
                 String format = color.substring(1, color.length() - 1);
                 String[] rgb = format.split(",");
                 int red = Integer.parseInt(rgb[0]);
@@ -259,13 +265,8 @@ public class WaveSimulationController extends DBConnector {
                     case "COS" -> WaveTypes.COS;
                     default -> throw new IllegalArgumentException("Invalid wave type: " + waveType);
                 };
-                System.out.println("Wave type: " + waveType);
                 Wave wave = new Wave(type, frequency, amplitude, waveColor);
                 addWave(wave);
-
-                String data = rs.getString("data");
-                //TODO
-//                waveSimulationDisplay.update(data, milliseconds);
                 }
             }
         } catch (Exception e) {
@@ -282,8 +283,8 @@ public class WaveSimulationController extends DBConnector {
         try {
             Connection conn = Connector("wave.db");
             PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setString(1, "Name");
-            stmt.executeUpdate(sql);
+            stmt.setString(1, simulationName);
+            stmt.executeUpdate();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -299,49 +300,13 @@ public class WaveSimulationController extends DBConnector {
         try {
             Connection conn = Connector("wave.db");
             PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setString(1, wave.getWaveType().toString());
-            stmt.setInt(2, wave.getFrequency());
-            stmt.setDouble(3, wave.getAmplitude());
-            stmt.setString(4, getDataPoints());
-            stmt.setString(5, wave.getColor().toString());
+            stmt.setString(2, wave.getWaveType().toString());
+            stmt.setInt(3, wave.getFrequency());
+            stmt.setDouble(4, wave.getAmplitude());
             stmt.setString(6, wave.getColor().toString());
             stmt.executeUpdate(sql);
         } catch (Exception e) {
             e.printStackTrace();}
-    }
-
-    /**
-     * Retrieves
-     * @return
-     */
-    public String getDataPoints() {
-        double[] dataPointsWave;
-        Map<Wave, double[]> dataPoints = new HashMap<>();
-
-        double[] dataPointsCombined = new double[sampleCount];
-        double gap = totalLength / sampleCount;
-        for (int i = 0; i < sampleCount; i++) {
-            double x = i * gap;
-            dataPointsCombined[i] = waveGenerator.combineWaves(x, milliseconds / 1000.0);
-        }
-        dataPoints.put(combinedWave, dataPointsCombined);
-
-        for (Wave wave : waves) {
-            dataPointsWave = new double[sampleCount];
-            for (int i = 0; i < sampleCount; i++) {
-                double x = i * gap;
-                dataPointsWave[i] = wave.amplitude(x, milliseconds / 1000.0);
-            }
-            dataPoints.put(wave, dataPointsWave);
-        }
-        String dataPointsString = "";
-        for (Map.Entry<Wave, double[]> entry : dataPoints.entrySet()) {
-            for (int i = 0; i < sampleCount; i++) {
-                dataPointsString += entry.getValue()[i];
-            }
-        }
-
-        return dataPointsString;
     }
 
     public void loadPresets() {
@@ -366,28 +331,6 @@ public class WaveSimulationController extends DBConnector {
         addWaveDB("Sawtooth Wave", new Wave(WaveTypes.SIN, 30, 0.33, new Color()));
         addWaveDB("Sawtooth Wave", new Wave(WaveTypes.SIN, 40, 0.25, new Color()));
     }
-
-    public static int[] extractNumbers(String input) {
-        String regex = "(\\d{1,3})";
-        Pattern pattern = Pattern.compile(regex);
-        Matcher match = pattern.matcher(input);
-
-        int[] numbers = new int[3];
-        int count = 0;
-
-        // Loop through all matches
-        while (match.find() && count < 3) {
-            numbers[count] = Integer.parseInt(match.group(1));
-            count++;
-        }
-
-        for (int i = count; i < 3; i++) {
-            numbers[i] = -1;
-        }
-
-        return numbers;
-    }
-
 
     public List<Wave> getWaves() {
         return waves;

@@ -80,6 +80,9 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
     private Button addWave;
 
     @FXML
+    private Button removeWave;
+
+    @FXML
     private AnchorPane chartPane;
 
     @FXML
@@ -112,6 +115,7 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
         waveSimulationController = new WaveSimulationController(500, this);
         try {
             soundController = new SoundController();
+            waveSimulationController.loadPresets();
         } catch (LineUnavailableException | IOException e) {
             throw new RuntimeException(e);
         }
@@ -119,7 +123,6 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
         // Initialize ComboBox with presets
         // TO-DO: Add & Load Presets : Build #3
         presetComboBox.getItems().addAll("Pure Sin", "Square Wave", "Triangle Wave", "Sawtooth Wave");
-        waveSimulationController.loadPresets();
         presetComboBox.setOnAction(this::handlePresetComboBox);
 
 
@@ -136,15 +139,6 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
         amplitudeColumn.setCellValueFactory(new PropertyValueFactory<>("amplitude"));
         // The use of currentAmplitudeColumn is part of another build, as it requires Wave Generator to clash multiple waves.
 //        currentAmplitudeColumn.setCellValueFactory(new PropertyValueFactory<>("currentAmplitude"));
-
-        Wave wave1 = new Wave(SIN, 1, 1.0);
-        Wave wave2 = new Wave(SIN, 1, -1.0);
-//        try {
-//            addWave(wave1);
-//            addWave(wave2);
-//        } catch (LineUnavailableException | IOException e) {
-//            throw new RuntimeException(e);
-//        }
 
         importButton.setOnAction(this::handleImportButton);
         exportButton.setOnAction(this::handleExportButton);
@@ -177,6 +171,16 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
                 addWave(newWave);
             } catch (LineUnavailableException | IOException e) {
                 throw new RuntimeException(e);
+            }
+        });
+
+        removeWave.setOnAction(event -> {
+            Wave selectedWave = addedWavesTableView.getSelectionModel().getSelectedItem();
+            if (selectedWave != null) {
+                addedWavesTableView.getItems().remove(selectedWave);
+                waveSimulationController.removeWave(selectedWave);
+                //soundController.removeWave(selectedWave);
+                waveSimulationController.simulate();
             }
         });
 
@@ -303,6 +307,7 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
                     addedWavesTableView.getItems().add(wave);
                 }
                 waveSimulationController.simulate();
+                waveSimulationController.clearWavesDB("Pure Sine");
                 break;
             case "Square Wave":
                 waveSimulationController.getWavesDB("Square Wave");
@@ -313,6 +318,7 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
                 waveSimulationController.simulate();
                 break;
             case "Sawtooth Wave":
+                waveSimulationController.clearWaves();
                 waveSimulationController.getWavesDB("Sawtooth Wave");
                 for (Wave wave : waveSimulationController.getWaves()) {
 //                    addWave(wave);

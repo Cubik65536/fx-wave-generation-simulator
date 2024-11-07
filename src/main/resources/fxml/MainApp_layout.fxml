@@ -14,7 +14,7 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<BorderPane xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1">
+<BorderPane xmlns="http://javafx.com/javafx/23" xmlns:fx="http://javafx.com/fxml/1">
    <center>
 
             <AnchorPane fx:id="chartPane" prefHeight="120" prefWidth="370.0">
@@ -85,7 +85,12 @@
                      </TableView>
                   </children>
                </VBox>
-               <Button fx:id="addWave" mnemonicParsing="false" text="AddWave" />
+               <VBox alignment="CENTER" prefHeight="190.0" prefWidth="97.0" spacing="20.0">
+                  <children>
+                     <Button fx:id="addWave" mnemonicParsing="false" text="AddWave" />
+                     <Button fx:id="removeWave" mnemonicParsing="false" text="RemoveWave" />
+                  </children>
+               </VBox>
             </HBox>
          </children>
       </AnchorPane>
