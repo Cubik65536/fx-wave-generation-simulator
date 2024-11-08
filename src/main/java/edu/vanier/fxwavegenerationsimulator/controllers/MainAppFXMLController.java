@@ -343,6 +343,7 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
         String preset = presetComboBox.getSelectionModel().getSelectedItem();
         switch (preset) {
             case "Pure Sin":
+                waveSimulationController.clearWaves();
                 waveSimulationController.getWavesDB("Pure Sine");
                 for (Wave wave : waveSimulationController.getWaves()) {
 //                    addWave(wave);
@@ -352,6 +353,7 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
                 waveSimulationController.clearWavesDB("Pure Sine");
                 break;
             case "Square Wave":
+                waveSimulationController.clearWaves();
                 waveSimulationController.getWavesDB("Square Wave");
                 for (Wave wave : waveSimulationController.getWaves()) {
 //                    addWave(wave);
@@ -369,6 +371,7 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
                 waveSimulationController.simulate();
                 break;
             case "Triangle Wave":
+                waveSimulationController.clearWaves();
                 waveSimulationController.getWavesDB("Triangle Wave");
                 for (Wave wave : waveSimulationController.getWaves()) {
 //                    addWave(wave);

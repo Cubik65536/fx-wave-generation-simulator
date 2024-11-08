@@ -241,34 +241,43 @@ public class WaveSimulationController extends DBConnector {
      * and related data points as a resultSet
      */
     public void getWavesDB(String simulationName) {
-        String sql = String.format("SELECT * FROM %s", "Wave");
+        String sql = String.format("SELECT * FROM %s WHERE Name = %s", "Wave", "'" + simulationName + "'");
         try {
             Connection conn = Connector("wave.db");
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
 
             while (rs.next()) {
-                if (rs.getString("Name").equals(simulationName)) {
-                String waveType = rs.getString("waveType");
-                int frequency = rs.getInt("frequency");
-                double amplitude = rs.getDouble("amplitude");
-                String color = rs.getString("color");
-                String format = color.substring(1, color.length() - 1);
-                String[] rgb = format.split(",");
-                int red = Integer.parseInt(rgb[0]);
-                int green = Integer.parseInt(rgb[1]);
-                int blue = Integer.parseInt(rgb[2]);
-                Color waveColor = new Color(red, green, blue);
+                    String waveType = rs.getString("waveType");
+                    int frequency = rs.getInt("frequency");
+                    double amplitude = rs.getDouble("amplitude");
+                    String color = rs.getString("color");
+                    String format = color.substring(1, color.length() - 1);
+                    String[] rgb = format.split(",");
+                    int red = Integer.parseInt(rgb[0]);
+                    int green = Integer.parseInt(rgb[1]);
+                    int blue = Integer.parseInt(rgb[2]);
+                    Color waveColor = new Color(red, green, blue);
 
-                WaveTypes type = switch (waveType) {
-                    case "SIN" -> WaveTypes.SIN;
-                    case "COS" -> WaveTypes.COS;
-                    default -> throw new IllegalArgumentException("Invalid wave type: " + waveType);
-                };
-                Wave wave = new Wave(type, frequency, amplitude, waveColor);
-                addWave(wave);
-                }
+                    WaveTypes type = switch (waveType) {
+                        case "SIN" -> WaveTypes.SIN;
+                        case "COS" -> WaveTypes.COS;
+                        default -> throw new IllegalArgumentException("Invalid wave type: " + waveType);
+                    };
+                    Wave wave = new Wave(type, frequency, amplitude, waveColor);
+                    addWave(wave);
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void clearWavesDB() {
+        String sql = String.format("DELETE FROM %s", "Wave");
+        try {
+            Connection conn = Connector("wave.db");
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.executeUpdate();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -279,11 +288,10 @@ public class WaveSimulationController extends DBConnector {
      * @param simulationName the name of the given simulation
      */
     public void clearWavesDB(String simulationName) {
-        String sql = String.format("DELETE FROM %s WHERE %s = ?", "Wave", "Name");
+        String sql = String.format("DELETE FROM %s WHERE Name = %s", "Wave", "'" + simulationName + "'");
         try {
             Connection conn = Connector("wave.db");
             PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setString(1, simulationName);
             stmt.executeUpdate();
         } catch (Exception e) {
             e.printStackTrace();
@@ -304,7 +312,7 @@ public class WaveSimulationController extends DBConnector {
             stmt.setInt(3, wave.getFrequency());
             stmt.setDouble(4, wave.getAmplitude());
             stmt.setString(6, wave.getColor().toString());
-            stmt.executeUpdate(sql);
+            stmt.executeUpdate();
         } catch (Exception e) {
             e.printStackTrace();}
     }
