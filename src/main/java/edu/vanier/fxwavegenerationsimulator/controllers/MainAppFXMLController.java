@@ -56,6 +56,9 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
     private Button exportButton;
 
     @FXML
+    private Button saveButton;
+
+    @FXML
     private ComboBox<String> presetComboBox;
 
     @FXML
@@ -175,6 +178,7 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
 
         importButton.setOnAction(this::handleImportButton);
         exportButton.setOnAction(this::handleExportButton);
+        saveButton.setOnAction(this::handleSaveButton);
 
         try {
             playButton.setOnAction(event -> {
@@ -278,6 +282,8 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
         xAxis.setMax(1000);
         xAxis.setAutoRanging(false);
         xAxis.setTickUnit(1);
+
+
     }
 
     /**
@@ -420,6 +426,26 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
 
             // Add the dataset to the chart
             Platform.runLater(() -> chart.getDatasets().add(dataSet));
+        }
+    }
+
+    public void handleSaveButton(ActionEvent event) {
+        logger.info("Saving wave data...");
+        try {
+            File file = new File("/resources/recentSimulations");
+
+            if (file != null && !file.exists()) {
+                // Use the JsonDataController to export the wave data
+                String jsonContent = JsonDataController.exportWaveSimulation(waveSimulationController);
+                // Write the JSON content to the file
+                Files.write(file.toPath(), jsonContent.getBytes());
+                logger.info("Wave saved to " + file.getAbsolutePath());
+            } else {
+                logger.warn("Save canceled or no file selected.");
+            }
+        } catch (IOException e) {
+            logger.error("An error occurred while saving wave data: " + e.getMessage());
+            showAlert("Error", "An error occurred while exporting wave data: " + e.getMessage());
         }
     }
 
