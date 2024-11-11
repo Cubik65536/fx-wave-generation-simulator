@@ -1,7 +1,6 @@
 package edu.vanier.fxwavegenerationsimulator.controllers;
 
 
-import edu.vanier.fxwavegenerationsimulator.MainApp;
 import edu.vanier.fxwavegenerationsimulator.db.DBConnector;
 import edu.vanier.fxwavegenerationsimulator.enums.WaveSimulationStatus;
 import edu.vanier.fxwavegenerationsimulator.enums.WaveTypes;
@@ -15,6 +14,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * This is the controller class that handles all simulation logics for the application.
@@ -126,7 +127,16 @@ public class WaveSimulationController extends DBConnector {
     public void addWave(Wave wave) {
         this.waves.add(wave);
         waveGenerator.addWave(wave);
+    }
 
+    public void clearWaves() {
+        this.waves.clear();
+        waveGenerator.clearWaves();
+    }
+
+    public void removeWave(Wave wave) {
+        this.waves.remove(wave);
+        waveGenerator.removeWave(wave);
     }
 
     /**
@@ -205,23 +215,22 @@ public class WaveSimulationController extends DBConnector {
      * and the related data points.
      * @param wave a wave object
      */
-    public void addWaveDB(String simulationName, String waveName, Wave wave) {
+    public void addWaveDB(String simulationName, Wave wave) {
         String sql = String.format(
-                "INSERT INTO %s (%s, %s, %s, %s, %s, %s, %s) VALUES (?, ?, ?, ?, ?, ?)","Wave", "Name", "waveName",
-                "waveType", "frequency", "amplitude", "data", "color");
+                "INSERT INTO %s (%s, %s, %s, %s, %s, %s) VALUES (?, ?, ?, ?, ?, ?)","Wave", "Name", "waveType", "frequency",
+                "amplitude", "data", "color");
 
         try {
             Connection conn = Connector("wave.db");
             PreparedStatement stmt = conn.prepareStatement(sql);
-
+            String data = "";
             stmt.setString(1, simulationName);
-            stmt.setString(2, waveName);
-            stmt.setString(3, wave.getWaveType().toString());
-            stmt.setInt(4, wave.getFrequency());
-            stmt.setDouble(5, wave.getAmplitude());
-            stmt.setString(6, getDataPoints());
-            stmt.setString(7, wave.getColor().toString());
-            stmt.executeUpdate(sql);
+            stmt.setString(2, wave.getWaveType().toString());
+            stmt.setInt(3, wave.getFrequency());
+            stmt.setDouble(4, wave.getAmplitude());
+            stmt.setString(5, data);
+            stmt.setString(6, wave.getColor().toString());
+            stmt.executeUpdate();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -232,40 +241,43 @@ public class WaveSimulationController extends DBConnector {
      * and related data points as a resultSet
      */
     public void getWavesDB(String simulationName) {
-        String sql = String.format("SELECT * FROM %s", "Wave");
+        String sql = String.format("SELECT * FROM %s WHERE Name = %s", "Wave", "'" + simulationName + "'");
         try {
             Connection conn = Connector("wave.db");
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
-            if (rs.getString("Name").equals(simulationName)) {
-                while (rs.next()) {
+
+            while (rs.next()) {
                     String waveType = rs.getString("waveType");
                     int frequency = rs.getInt("frequency");
                     double amplitude = rs.getDouble("amplitude");
                     String color = rs.getString("color");
-                    // Find the 3 rgb values from color
-                    Color waveColor = new Color(Integer.parseInt(color.substring(0, 3)), Integer.parseInt(color.substring(3, 6)), Integer.parseInt(color.substring(6, 9)));
+                    String format = color.substring(1, color.length() - 1);
+                    String[] rgb = format.split(",");
+                    int red = Integer.parseInt(rgb[0]);
+                    int green = Integer.parseInt(rgb[1]);
+                    int blue = Integer.parseInt(rgb[2]);
+                    Color waveColor = new Color(red, green, blue);
 
                     WaveTypes type = switch (waveType) {
                         case "SIN" -> WaveTypes.SIN;
                         case "COS" -> WaveTypes.COS;
                         default -> throw new IllegalArgumentException("Invalid wave type: " + waveType);
                     };
-
                     Wave wave = new Wave(type, frequency, amplitude, waveColor);
                     addWave(wave);
-
-                    String data = rs.getString("data");
-                    HashMap<Wave, double[]> dataPoints = new HashMap<>();
-                    for (String s : data.split(",")) {
-
-                    }
-                    //TODO
-//                waveSimulationDisplay.update(data, milliseconds);
-                }
-            } else {
-                System.out.println("Not in db");
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void clearWavesDB() {
+        String sql = String.format("DELETE FROM %s", "Wave");
+        try {
+            Connection conn = Connector("wave.db");
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.executeUpdate();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -275,18 +287,12 @@ public class WaveSimulationController extends DBConnector {
      * Removes the wave based on a unique modifier color in the database.
      * @param simulationName the name of the given simulation
      */
-    public void clearWavesDB(String simulationName, String waveName) {
-        String sql = String.format("DELETE FROM %s WHERE %s = ?", "Wave", "Name");
+    public void clearWavesDB(String simulationName) {
+        String sql = String.format("DELETE FROM %s WHERE Name = %s", "Wave", "'" + simulationName + "'");
         try {
             Connection conn = Connector("wave.db");
             PreparedStatement stmt = conn.prepareStatement(sql);
-            ResultSet rs = stmt.executeQuery(sql);
-            if (rs.getString("Name").equals(simulationName) &&
-                    rs.getString("waveName").equals(waveName)) {
-                stmt.executeUpdate(sql);
-            } else {
-                System.out.println("Not found");
-            }
+            stmt.executeUpdate();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -296,57 +302,42 @@ public class WaveSimulationController extends DBConnector {
      * Updates pre-existing waves in the database.
      * @param wave
      */
-    public void updateWavesDB(String simulationName, String waveName, Wave wave) {
+    public void updateWavesDB(Wave wave) {
         String sql = String.format("UPDATE %s SET %s = ?, %s = ?, %s = ?, %s = ?, %s = ? WHERE %s = ?", "Wave",
                 "waveType", "frequency", "amplitude", "data", "color", "color");
         try {
             Connection conn = Connector("wave.db");
             PreparedStatement stmt = conn.prepareStatement(sql);
-            ResultSet rs = stmt.executeQuery(sql);
-            if (rs.getString("Name").equals(simulationName) && rs.getString("waveName").equals(waveName)) {
-                stmt.setString(3, wave.getWaveType().toString());
-                stmt.setInt(4, wave.getFrequency());
-                stmt.setDouble(5, wave.getAmplitude());
-                stmt.setString(6, getDataPoints());
-                stmt.setString(7, wave.getColor().toString());
-            }
-            stmt.executeUpdate(sql);
+            stmt.setString(2, wave.getWaveType().toString());
+            stmt.setInt(3, wave.getFrequency());
+            stmt.setDouble(4, wave.getAmplitude());
+            stmt.setString(6, wave.getColor().toString());
+            stmt.executeUpdate();
         } catch (Exception e) {
             e.printStackTrace();}
     }
 
-    /**
-     * Retrieves
-     * @return
-     */
-    public String getDataPoints() {
-        double[] dataPointsWave;
-        Map<Wave, double[]> dataPoints = new HashMap<>();
+    public void loadPresets() {
+        // Pure Sine Wave Preset
+        addWaveDB("Pure Sine", new Wave(WaveTypes.SIN, 10, 1.0, new Color()));
 
-        double[] dataPointsCombined = new double[sampleCount];
-        double gap = totalLength / sampleCount;
-        for (int i = 0; i < sampleCount; i++) {
-            double x = i * gap;
-            dataPointsCombined[i] = waveGenerator.combineWaves(x, milliseconds / 1000.0);
-        }
-        dataPoints.put(combinedWave, dataPointsCombined);
+        // Square Wave Presets
+        addWaveDB("Square Wave", new Wave(WaveTypes.SIN, 10, 1.0, new Color()));
+        addWaveDB("Square Wave", new Wave(WaveTypes.SIN, 30, 0.33, new Color()));
+        addWaveDB("Square Wave", new Wave(WaveTypes.SIN, 50, 0.20, new Color()));
+        addWaveDB("Square Wave", new Wave(WaveTypes.SIN, 70, 0.14, new Color()));
 
-        for (Wave wave : waves) {
-            dataPointsWave = new double[sampleCount];
-            for (int i = 0; i < sampleCount; i++) {
-                double x = i * gap;
-                dataPointsWave[i] = wave.amplitude(x, milliseconds / 1000.0);
-            }
-            dataPoints.put(wave, dataPointsWave);
-        }
-        String dataPointsString = "";
-        for (Map.Entry<Wave, double[]> entry : dataPoints.entrySet()) {
-            for (int i = 0; i < sampleCount; i++) {
-                dataPointsString += entry.getValue()[i];
-            }
-        }
+        // Triangle Wave Presets
+        addWaveDB("Triangle Wave", new Wave(WaveTypes.SIN, 10, 1.0, new Color()));
+        addWaveDB("Triangle Wave", new Wave(WaveTypes.SIN, 30, 0.11, new Color()));
+        addWaveDB("Triangle Wave", new Wave(WaveTypes.SIN, 50, 0.04, new Color()));
+        addWaveDB("Triangle Wave", new Wave(WaveTypes.SIN, 70, 0.02, new Color()));
 
-        return dataPointsString;
+        // Sawtooth Wave Presets
+        addWaveDB("Sawtooth Wave", new Wave(WaveTypes.SIN, 10, 1.0, new Color()));
+        addWaveDB("Sawtooth Wave", new Wave(WaveTypes.SIN, 20, 0.5, new Color()));
+        addWaveDB("Sawtooth Wave", new Wave(WaveTypes.SIN, 30, 0.33, new Color()));
+        addWaveDB("Sawtooth Wave", new Wave(WaveTypes.SIN, 40, 0.25, new Color()));
     }
 
     public List<Wave> getWaves() {

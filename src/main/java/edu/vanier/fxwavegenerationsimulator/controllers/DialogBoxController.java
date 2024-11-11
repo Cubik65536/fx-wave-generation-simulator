@@ -20,6 +20,11 @@ public class DialogBoxController extends Stage {
     static Wave wave;
 
     /**
+     * The flag indicating if the user selected "Cancel" to close the dialog box.
+     */
+    private boolean cancelled;
+
+    /**
      * The display method to show the dialog box.
      * This isn't done in fxml because it is handled differently to be imported into the AddedWaves Tableview.
      */
@@ -106,10 +111,12 @@ public class DialogBoxController extends Stage {
                 return;
             }
 
+            cancelled = false;
             this.hide();
         });
 
         cancelButton.setOnAction(e -> {
+            cancelled = true;
             this.hide();
         });
 
@@ -122,5 +129,14 @@ public class DialogBoxController extends Stage {
      */
     public Wave getWave() {
         return wave;
+    }
+
+    /**
+     * Getter for the isCancelled flag, so the main app can know if there is result to be read.
+     * @return if the dialog box was cancelled
+     * @author Qian Qian
+     */
+    public boolean isCancelled() {
+        return cancelled;
     }
 }

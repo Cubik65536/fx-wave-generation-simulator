@@ -1,5 +1,6 @@
 package edu.vanier.fxwavegenerationsimulator.controllers;
 
+import edu.vanier.fxwavegenerationsimulator.MainApp;
 import edu.vanier.fxwavegenerationsimulator.enums.WaveSimulationStatus;
 import edu.vanier.fxwavegenerationsimulator.exceptions.ChosenFileIsDirectoryException;
 import edu.vanier.fxwavegenerationsimulator.models.Wave;
@@ -24,15 +25,13 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Map;
 
-import static edu.vanier.fxwavegenerationsimulator.enums.WaveTypes.SIN;
-
 /**
  *  FXML controller class for the main application.
  *  This class handles all UI elements in the main application.
- *  Requires the WaveSimulationController class to be initialized. (TO-DO)
+ *  Requires the WaveSimulationController class to be initialized.
+ *
  *  @author CihaoZhang
  */
-
 public class MainAppFXMLController implements WaveSimulationDisplay {
     private final static Logger logger = LoggerFactory.getLogger(MainAppFXMLController.class);
 
@@ -40,6 +39,11 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
     private SoundController soundController;
 
     private Wave wave;
+
+    /**
+     * The analyzer window controller that controls the window that shows data about playing sound.
+     */
+    private AnalyzerFXMLController analyzerFXMLController;
 
     public DialogBoxController dialogBoxController;
 
@@ -80,6 +84,9 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
     private Button addWave;
 
     @FXML
+    private Button removeWave;
+
+    @FXML
     private AnchorPane chartPane;
 
     @FXML
@@ -88,7 +95,19 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
     @FXML
     private RadioButton audioOnButton;
 
+    @FXML
+    private CheckBox showAnalyzerCheckBox;
+
     private XYChart chart;
+
+    /**
+     * The setter for the analyzerFXMLController, so the MainApp can pass in the controller
+     * so the current Main App Controller can control the Analyzer Window.
+     * @param analyzerFXMLController the controller of the Analyzer Window
+     */
+    public void setAnalyzerFXMLController(AnalyzerFXMLController analyzerFXMLController) {
+        this.analyzerFXMLController = analyzerFXMLController;
+    }
 
     /**
      * Add the new wave to ALL required places (simulation controller, audio controller, table view, etc.)
@@ -112,6 +131,7 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
         waveSimulationController = new WaveSimulationController(500, this);
         try {
             soundController = new SoundController();
+            waveSimulationController.loadPresets();
         } catch (LineUnavailableException | IOException e) {
             throw new RuntimeException(e);
         }
@@ -119,6 +139,8 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
         // Initialize ComboBox with presets
         // TO-DO: Add & Load Presets : Build #3
         presetComboBox.getItems().addAll("Pure Sin", "Square Wave", "Triangle Wave", "Sawtooth Wave");
+        presetComboBox.setOnAction(this::handlePresetComboBox);
+
 
         // Use ToggleGroup to ensure only one audio button is selected at a time
         ToggleGroup audioToggleGroup = new ToggleGroup();
@@ -134,24 +156,23 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
         // The use of currentAmplitudeColumn is part of another build, as it requires Wave Generator to clash multiple waves.
 //        currentAmplitudeColumn.setCellValueFactory(new PropertyValueFactory<>("currentAmplitude"));
 
-        Wave wave1 = new Wave(SIN, 1, 1.0);
-        Wave wave2 = new Wave(SIN, 1, -1.0);
-//        try {
-//            addWave(  wave1);
-//            addWave(wave2);
-//        } catch (LineUnavailableException | IOException e) {
-//            throw new RuntimeException(e);
-//        }
-
         importButton.setOnAction(this::handleImportButton);
         exportButton.setOnAction(this::handleExportButton);
 
         try {
             playButton.setOnAction(event -> {
                 waveSimulationController.start();
+                if (analyzerFXMLController != null) {
+                    // Update the sound data on the chart
+                    analyzerFXMLController.start();
+                }
             });
             pauseButton.setOnAction(event -> {
                 waveSimulationController.pause();
+                if (analyzerFXMLController != null) {
+                    // Stop updating the sound data on the chart
+                    analyzerFXMLController.stop();
+                }
 
                 // Stop sound when the simulation is paused
                 soundController.stop();
@@ -159,7 +180,12 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
                 audioOffButton.setSelected(true);
             });
             stepButton.setOnAction(event -> {
-                waveSimulationController.step(100);
+                int step = 100;
+                waveSimulationController.step(step);
+                if (analyzerFXMLController != null) {
+                    // Update the sound data on the chart
+                    analyzerFXMLController.step(step);
+                }
             });
         } catch (Exception e) {
             logger.error("Error initializing wave simulation: {}", e.getMessage());
@@ -169,11 +195,24 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
         addWave.setOnAction(event -> {
             dialogBoxController = new DialogBoxController();
             dialogBoxController.showAndWait();
-            Wave newWave = dialogBoxController.getWave();
-            try {
-                addWave(newWave);
-            } catch (LineUnavailableException | IOException e) {
-                throw new RuntimeException(e);
+            if (!dialogBoxController.isCancelled()) {
+                // Only read new wave data if the add wave dialog is not closed by cancel
+                Wave newWave = dialogBoxController.getWave();
+                try {
+                    addWave(newWave);
+                } catch (LineUnavailableException | IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+
+        removeWave.setOnAction(event -> {
+            Wave selectedWave = addedWavesTableView.getSelectionModel().getSelectedItem();
+            if (selectedWave != null) {
+                addedWavesTableView.getItems().remove(selectedWave);
+                waveSimulationController.removeWave(selectedWave);
+                //soundController.removeWave(selectedWave);
+                waveSimulationController.simulate();
             }
         });
 
@@ -190,6 +229,16 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
         // Stop sound when the audioOffButton is selected
         audioOffButton.setOnAction(event -> {
             soundController.stop();
+        });
+
+        showAnalyzerCheckBox.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue) {
+                // Show the Wave Analyzer
+                MainApp.showWaveAnalyzer();
+            } else {
+                // Hide the Wave Analyzer
+                MainApp.hideWaveAnalyzer();
+            }
         });
 
         // Set up the chart for wave visualization
@@ -289,6 +338,54 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
         }
     }
 
+    public void handlePresetComboBox(ActionEvent event) {
+        try {
+        String preset = presetComboBox.getSelectionModel().getSelectedItem();
+        switch (preset) {
+            case "Pure Sin":
+                waveSimulationController.clearWaves();
+                waveSimulationController.getWavesDB("Pure Sine");
+                for (Wave wave : waveSimulationController.getWaves()) {
+//                    addWave(wave);
+                    addedWavesTableView.getItems().add(wave);
+                }
+                waveSimulationController.simulate();
+                waveSimulationController.clearWavesDB("Pure Sine");
+                break;
+            case "Square Wave":
+                waveSimulationController.clearWaves();
+                waveSimulationController.getWavesDB("Square Wave");
+                for (Wave wave : waveSimulationController.getWaves()) {
+//                    addWave(wave);
+                    addedWavesTableView.getItems().add(wave);
+                }
+                waveSimulationController.simulate();
+                break;
+            case "Sawtooth Wave":
+                waveSimulationController.clearWaves();
+                waveSimulationController.getWavesDB("Sawtooth Wave");
+                for (Wave wave : waveSimulationController.getWaves()) {
+//                    addWave(wave);
+                    addedWavesTableView.getItems().add(wave);
+                }
+                waveSimulationController.simulate();
+                break;
+            case "Triangle Wave":
+                waveSimulationController.clearWaves();
+                waveSimulationController.getWavesDB("Triangle Wave");
+                for (Wave wave : waveSimulationController.getWaves()) {
+//                    addWave(wave);
+                    addedWavesTableView.getItems().add(wave);
+                }
+                waveSimulationController.simulate();
+                break;
+            }
+        } catch (Exception e) {
+            System.err.println("An unexpected error occurred: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
     /**
      * Creates a dataset for each wave and adds it to the chart. This method draws the graph of the wave.
      * This is the main UI component of the application.
@@ -315,5 +412,25 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
             // Add the dataset to the chart
             Platform.runLater(() -> chart.getDatasets().add(dataSet));
         }
+    }
+
+    /**
+     * A getter for the "Show Analyzer" CheckBox, so it can be
+     * automatically unchecked elsewhere when the Analyzer Window is closed.
+     * @return the object of the "Show Analyzer" CheckBox
+     * @author Qian Qian
+     */
+    public CheckBox getShowAnalyzerCheckBox() {
+        return showAnalyzerCheckBox;
+    }
+
+    /**
+     * A getter for the Sound Controller so that the Wave Analyzer can access it
+     * to get sound data to show.
+     * @return the Sound Controller object that is active in this simulation
+     * @author Qian Qian
+     */
+    public SoundController getSoundController() {
+        return soundController;
     }
 }
