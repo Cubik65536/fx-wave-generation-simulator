@@ -64,10 +64,9 @@ public class SoundController {
      * @return the byte value of the amplitude
      */
     private byte getBufferValue(double amplitude, int waveCount) {
-        // The byte value is first converted from a range of -1 to 1 with decimal
-        // to a range of -127 to 127 (byte range) so it can be put into the buffer which is a byte array.
-        // It is then divided by the number of wave existing so all waves amplitude added up will not exceed the maximum volume.
-        return Integer.valueOf((int) Math.round(amplitude * MAX_VOLUME / waveCount)).byteValue();
+        // The amplitude value is divided by the total number of waves, so it stays in the range of -1 to 1.
+        // Then it is converted to a range of -127 to 127 (byte range) so it can be put into the buffer which is a byte array.
+        return Integer.valueOf((int) Math.round(amplitude / waveCount * MAX_VOLUME)).byteValue();
     }
 
     /**
