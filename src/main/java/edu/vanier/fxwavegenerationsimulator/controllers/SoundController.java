@@ -132,6 +132,17 @@ public class SoundController {
     }
 
     /**
+     * Remove all waves from the sound controller.
+     * @throws LineUnavailableException
+     * @throws IOException
+     */
+    public void clearWaves() throws LineUnavailableException, IOException {
+        waves.clear();
+        refreshBuffer();
+        generateTone();
+    }
+
+    /**
      * Start playing the generated sound.
      */
     public void start() {
