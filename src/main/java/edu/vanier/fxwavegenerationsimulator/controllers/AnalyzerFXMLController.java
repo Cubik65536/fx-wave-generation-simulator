@@ -46,7 +46,7 @@ public class AnalyzerFXMLController {
     /**
      * The task that updates the data on the chart.
      */
-    private class UpateTask extends TimerTask {
+    private class UpdateTask extends TimerTask {
         @Override
         public void run() {
             milliseconds++;
@@ -93,7 +93,7 @@ public class AnalyzerFXMLController {
                 });
             }
         }
-    };
+    }
 
     @FXML
     private AnchorPane analyzerGraphPane;
@@ -191,7 +191,7 @@ public class AnalyzerFXMLController {
         }
         this.timer = new Timer();
         // Schedule the update task to run every 1 millisecond, which is the minimum allowed period.
-        this.timer.scheduleAtFixedRate(new UpateTask(), 0, 1);
+        this.timer.scheduleAtFixedRate(new UpdateTask(), 0, 1);
     }
 
     /**
@@ -216,6 +216,6 @@ public class AnalyzerFXMLController {
     public void step(int milliseconds) {
         this.milliseconds += milliseconds;
         // Update the data on the chart.
-        new UpateTask().run();
+        new UpdateTask().run();
     }
 }

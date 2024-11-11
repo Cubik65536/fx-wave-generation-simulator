@@ -78,15 +78,13 @@ public class WaveSimulationController {
     /**
      * The task that updates the simulation data.
      */
-    private class UpateTask extends TimerTask {
+    private class UpdateTask extends TimerTask {
         @Override
         public void run() {
             milliseconds += DEFAULT_UPDATE_INTERVAL;
             simulate();
         }
     }
-
-    ;
 
     /**
      * Instantiate the wave simulation controller with a given length of the wave to be simulated
@@ -170,7 +168,7 @@ public class WaveSimulationController {
             this.timer.cancel();
         }
         this.timer = new Timer();
-        this.timer.scheduleAtFixedRate(new UpateTask(), 0, DEFAULT_UPDATE_INTERVAL);
+        this.timer.scheduleAtFixedRate(new UpdateTask(), 0, DEFAULT_UPDATE_INTERVAL);
 
         // Set the simulation status to playing.
         this.simulationStatus = WaveSimulationStatus.PLAYING;
