@@ -23,6 +23,7 @@ import javax.sound.sampled.LineUnavailableException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Map;
 
 /**
@@ -37,6 +38,7 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
 
     private WaveSimulationController waveSimulationController;
     private SoundController soundController;
+    private DatabaseController databaseController;
 
     private Wave wave;
 
@@ -124,14 +126,30 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
         waveSimulationController.simulate();
     }
 
+    /**
+     * Clear all waves from the all places.
+     * @author Qian Qian
+     */
+    private void clearWaves() throws LineUnavailableException, IOException {
+        // Clear the TableView
+        addedWavesTableView.getItems().clear();
+        // Clear the WaveSimulationController and SoundController
+        waveSimulationController.clearWaves();
+        soundController.clearWaves();
+        // Clear the chart
+        chart.getDatasets().clear();
+    }
+
     @FXML
     public void initialize() {
         logger.info("Initializing MainAppController...");
 
         waveSimulationController = new WaveSimulationController(500, this);
+        databaseController = new DatabaseController();
+
         try {
             soundController = new SoundController();
-            waveSimulationController.loadPresets();
+            databaseController.loadPresets();
         } catch (LineUnavailableException | IOException e) {
             throw new RuntimeException(e);
         }
@@ -140,7 +158,6 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
         // TO-DO: Add & Load Presets : Build #3
         presetComboBox.getItems().addAll("Pure Sin", "Square Wave", "Triangle Wave", "Sawtooth Wave");
         presetComboBox.setOnAction(this::handlePresetComboBox);
-
 
         // Use ToggleGroup to ensure only one audio button is selected at a time
         ToggleGroup audioToggleGroup = new ToggleGroup();
@@ -341,43 +358,35 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
     public void handlePresetComboBox(ActionEvent event) {
         try {
         String preset = presetComboBox.getSelectionModel().getSelectedItem();
+        ArrayList<Wave> wavesToAdd;
         switch (preset) {
             case "Pure Sin":
-                waveSimulationController.clearWaves();
-                waveSimulationController.getWavesDB("Pure Sine");
-                for (Wave wave : waveSimulationController.getWaves()) {
-//                    addWave(wave);
-                    addedWavesTableView.getItems().add(wave);
+                clearWaves();
+                wavesToAdd = databaseController.getWavesDB("Pure Sine");
+                for (Wave wave: wavesToAdd) {
+                    addWave(wave);
                 }
-                waveSimulationController.simulate();
-                waveSimulationController.clearWavesDB("Pure Sine");
                 break;
             case "Square Wave":
-                waveSimulationController.clearWaves();
-                waveSimulationController.getWavesDB("Square Wave");
-                for (Wave wave : waveSimulationController.getWaves()) {
-//                    addWave(wave);
-                    addedWavesTableView.getItems().add(wave);
+                clearWaves();
+                wavesToAdd = databaseController.getWavesDB("Square Wave");
+                for (Wave wave: wavesToAdd) {
+                    addWave(wave);
                 }
-                waveSimulationController.simulate();
                 break;
             case "Sawtooth Wave":
-                waveSimulationController.clearWaves();
-                waveSimulationController.getWavesDB("Sawtooth Wave");
-                for (Wave wave : waveSimulationController.getWaves()) {
-//                    addWave(wave);
-                    addedWavesTableView.getItems().add(wave);
+                clearWaves();
+                wavesToAdd = databaseController.getWavesDB("Sawtooth Wave");
+                for (Wave wave: wavesToAdd) {
+                    addWave(wave);
                 }
-                waveSimulationController.simulate();
                 break;
             case "Triangle Wave":
-                waveSimulationController.clearWaves();
-                waveSimulationController.getWavesDB("Triangle Wave");
-                for (Wave wave : waveSimulationController.getWaves()) {
-//                    addWave(wave);
-                    addedWavesTableView.getItems().add(wave);
+                clearWaves();
+                wavesToAdd = databaseController.getWavesDB("Triangle Wave");
+                for (Wave wave: wavesToAdd) {
+                    addWave(wave);
                 }
-                waveSimulationController.simulate();
                 break;
             }
         } catch (Exception e) {
