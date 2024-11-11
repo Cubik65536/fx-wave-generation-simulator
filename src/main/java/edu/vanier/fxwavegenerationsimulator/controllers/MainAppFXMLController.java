@@ -242,8 +242,8 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
         });
 
         // Set up the chart for wave visualization
-        DefaultNumericAxis xAxis = new DefaultNumericAxis("X-Axis");
-        DefaultNumericAxis yAxis = new DefaultNumericAxis("Y-Axis");
+        DefaultNumericAxis xAxis = new DefaultNumericAxis("Position", null);
+        DefaultNumericAxis yAxis = new DefaultNumericAxis("Frequency", "Hz");
         chart = new XYChart(xAxis, yAxis);
 
         chart.setTitle("Wave Simulation");
