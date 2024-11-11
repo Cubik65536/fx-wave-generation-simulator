@@ -132,6 +132,18 @@ public class SoundController {
     }
 
     /**
+     * Remove a wave from the sound controller.
+     * @param wave the wave to be removed
+     */
+    public void removeWave(Wave wave) throws LineUnavailableException, IOException {
+        // Remove wave from the list.
+        waves.remove(wave);
+        // Refresh the buffer and generate the sound.
+        refreshBuffer();
+        generateTone();
+    }
+
+    /**
      * Remove all waves from the sound controller.
      * @throws LineUnavailableException
      * @throws IOException

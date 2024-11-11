@@ -127,6 +127,20 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
     }
 
     /**
+     * Remove a specific wave from all places.
+     * @param wave the wave to be removed
+     */
+    private void removeWave(Wave wave) throws LineUnavailableException, IOException {
+        // Remove the wave from the TableView
+        addedWavesTableView.getItems().remove(wave);
+        // Remove the wave from the WaveSimulationController and SoundController
+        waveSimulationController.removeWave(wave);
+        soundController.removeWave(wave);
+        // Update the chart with the new wave
+        waveSimulationController.simulate();
+    }
+
+    /**
      * Clear all waves from the all places.
      * @author Qian Qian
      */
@@ -226,10 +240,11 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
         removeWave.setOnAction(event -> {
             Wave selectedWave = addedWavesTableView.getSelectionModel().getSelectedItem();
             if (selectedWave != null) {
-                addedWavesTableView.getItems().remove(selectedWave);
-                waveSimulationController.removeWave(selectedWave);
-                //soundController.removeWave(selectedWave);
-                waveSimulationController.simulate();
+                try {
+                    removeWave(selectedWave);
+                } catch (LineUnavailableException | IOException e) {
+                    logger.error("Error removing wave: {}", e.getMessage());
+                }
             }
         });
 
