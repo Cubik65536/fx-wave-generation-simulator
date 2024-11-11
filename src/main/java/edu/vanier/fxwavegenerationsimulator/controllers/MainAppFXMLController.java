@@ -83,10 +83,13 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
     private TableColumn<Wave, Double> currentAmplitudeColumn;
 
     @FXML
-    private Button addWave;
+    private Button addWaveButton;
 
     @FXML
-    private Button removeWave;
+    private Button removeWaveButton;
+
+    @FXML
+    private Button clearWavesButton;
 
     @FXML
     private AnchorPane chartPane;
@@ -223,7 +226,7 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
             showAlert("Error", "Error initializing wave simulation: " + e.getMessage());
         }
 
-        addWave.setOnAction(event -> {
+        addWaveButton.setOnAction(event -> {
             dialogBoxController = new DialogBoxController();
             dialogBoxController.showAndWait();
             if (!dialogBoxController.isCancelled()) {
@@ -237,7 +240,7 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
             }
         });
 
-        removeWave.setOnAction(event -> {
+        removeWaveButton.setOnAction(event -> {
             Wave selectedWave = addedWavesTableView.getSelectionModel().getSelectedItem();
             if (selectedWave != null) {
                 try {
@@ -245,6 +248,14 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
                 } catch (LineUnavailableException | IOException e) {
                     logger.error("Error removing wave: {}", e.getMessage());
                 }
+            }
+        });
+
+        clearWavesButton.setOnAction(event -> {
+            try {
+                clearWaves();
+            } catch (LineUnavailableException | IOException e) {
+                logger.error("Error clearing waves: {}", e.getMessage());
             }
         });
 
