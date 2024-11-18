@@ -65,6 +65,9 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
     private Button pauseButton;
 
     @FXML
+    private Button stopButton;
+
+    @FXML
     private Button stepButton;
 
     @FXML
@@ -205,10 +208,22 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
                 waveSimulationController.pause();
                 if (analyzerFXMLController != null) {
                     // Stop updating the sound data on the chart
-                    analyzerFXMLController.stop();
+                    analyzerFXMLController.pause();
                 }
 
                 // Stop sound when the simulation is paused
+                soundController.stop();
+                // Reset the audio playing toggle
+                audioOffButton.setSelected(true);
+            });
+            stopButton.setOnAction(event -> {
+                waveSimulationController.stop();
+                if (analyzerFXMLController != null) {
+                    // Stop updating the sound data on the chart
+                    analyzerFXMLController.stop();
+                }
+
+                // Stop sound when the simulation is stopped
                 soundController.stop();
                 // Reset the audio playing toggle
                 audioOffButton.setSelected(true);
