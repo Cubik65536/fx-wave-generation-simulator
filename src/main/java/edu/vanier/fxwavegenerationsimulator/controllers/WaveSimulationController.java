@@ -193,6 +193,9 @@ public class WaveSimulationController {
 
         // Set the simulation status to stopped.
         this.simulationStatus = WaveSimulationStatus.STOPPED;
+
+        // Get a simulation result at t=0 and reset the result to that.
+        simulate();
     }
 
     /**

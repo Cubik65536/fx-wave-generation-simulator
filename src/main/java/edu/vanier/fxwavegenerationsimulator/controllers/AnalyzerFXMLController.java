@@ -207,6 +207,19 @@ public class AnalyzerFXMLController {
     public void stop() {
         this.timer.cancel();
         this.milliseconds = 0;
+
+        // Clear all charts to reset.
+        Platform.runLater(() -> {
+            // Clear the wave analyzer chart.
+            waveAnalyzerRenderer.getDatasets().removeAll(waveAnalyzerRenderer.getDatasets());
+
+            // Set the volume chart to 0.
+            volumeLabel.setText("0/127");
+            DefaultDataSet volumeDataSet = new DefaultDataSet("Volume");
+            volumeDataSet.add(0, 0);
+            volumeDataSet.add(1, 0);
+            volumeRenderer.getDatasets().set(0, volumeDataSet);
+        });
     }
 
     /**
