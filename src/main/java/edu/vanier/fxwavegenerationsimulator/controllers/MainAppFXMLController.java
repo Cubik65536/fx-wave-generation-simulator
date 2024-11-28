@@ -14,6 +14,9 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.effect.ColorAdjust;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
 import org.slf4j.Logger;
@@ -59,16 +62,16 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
     private ComboBox<String> presetComboBox;
 
     @FXML
-    private Button playButton;
+    private ImageView playButton;
 
     @FXML
-    private Button pauseButton;
+    private ImageView pauseButton;
 
     @FXML
-    private Button stopButton;
+    private ImageView stopButton;
 
     @FXML
-    private Button stepButton;
+    private ImageView stepButton;
 
     @FXML
     private TableView<Wave> addedWavesTableView;
@@ -196,15 +199,50 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
         importButton.setOnAction(this::handleImportButton);
         exportButton.setOnAction(this::handleExportButton);
 
+        Image play = new Image("/images/circle-play.png");
+        playButton.setImage(play);
+
+        Image stop = new Image("/images/circle-stop.png");
+        stopButton.setImage(stop);
+
+        Image pause = new Image("/images/circle-pause.png");
+        pauseButton.setImage(pause);
+
+        //Instantiating the ColorAdjust class
+        ColorAdjust clickedButton = new ColorAdjust();
+
+        //Setting the contrast value
+        clickedButton.setContrast(0.4);
+
+        //Setting the hue value
+        clickedButton.setHue(-0.05);
+
+        clickedButton.setBrightness(1.0);
+
+        clickedButton.setSaturation(0.5);
+        ColorAdjust unClickedButton = new ColorAdjust();
+
+        playButton.setFitHeight(50);
+        playButton.setFitWidth(50);
+
+        stopButton.setFitHeight(50);
+        stopButton.setFitWidth(50);
+
+        pauseButton.setFitHeight(50);
+        pauseButton.setFitWidth(50);
+
         try {
-            playButton.setOnAction(event -> {
+            playButton.setOnMouseClicked(event -> {
                 waveSimulationController.start();
                 if (analyzerFXMLController != null) {
                     // Update the sound data on the chart
                     analyzerFXMLController.start();
                 }
+                playButton.setEffect(clickedButton);
+                pauseButton.setEffect(unClickedButton);
+                stopButton.setEffect(unClickedButton);
             });
-            pauseButton.setOnAction(event -> {
+            pauseButton.setOnMouseClicked(event -> {
                 waveSimulationController.pause();
                 if (analyzerFXMLController != null) {
                     // Stop updating the sound data on the chart
@@ -215,8 +253,11 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
                 soundController.stop();
                 // Reset the audio playing toggle
                 audioOffButton.setSelected(true);
+                playButton.setEffect(unClickedButton);
+                pauseButton.setEffect(clickedButton);
+                stopButton.setEffect(unClickedButton);
             });
-            stopButton.setOnAction(event -> {
+            stopButton.setOnMouseClicked(event -> {
                 waveSimulationController.stop();
                 if (analyzerFXMLController != null) {
                     // Stop updating the sound data on the chart
@@ -227,15 +268,18 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
                 soundController.stop();
                 // Reset the audio playing toggle
                 audioOffButton.setSelected(true);
+                playButton.setEffect(unClickedButton);
+                pauseButton.setEffect(unClickedButton);
+                stopButton.setEffect(clickedButton);
             });
-            stepButton.setOnAction(event -> {
-                int step = 100;
-                waveSimulationController.step(step);
-                if (analyzerFXMLController != null) {
-                    // Update the sound data on the chart
-                    analyzerFXMLController.step(step);
-                }
-            });
+//            stepButton.setOnAction(event -> {
+//                int step = 100;
+//                waveSimulationController.step(step);
+//                if (analyzerFXMLController != null) {
+//                    // Update the sound data on the chart
+//                    analyzerFXMLController.step(step);
+//                }
+//            });
         } catch (Exception e) {
             logger.error("Error initializing wave simulation: {}", e.getMessage());
             showAlert("Error", "Error initializing wave simulation: " + e.getMessage());
