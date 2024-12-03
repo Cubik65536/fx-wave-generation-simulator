@@ -1,6 +1,7 @@
 package edu.vanier.fxwavegenerationsimulator;
 
 import edu.vanier.fxwavegenerationsimulator.controllers.AnalyzerFXMLController;
+import edu.vanier.fxwavegenerationsimulator.controllers.DatabaseController;
 import edu.vanier.fxwavegenerationsimulator.controllers.MainAppFXMLController;
 import java.io.IOException;
 
@@ -54,6 +55,12 @@ public class MainApp extends Application {
             primaryStage.setAlwaysOnTop(true);
             primaryStage.show();
             primaryStage.setAlwaysOnTop(false);
+
+            primaryStage.setOnCloseRequest(event -> {
+                mainAppFXMLController.databaseController.clearAllWavesDB();
+                logger.info("Application shutdown.");
+                System.exit(0);
+            });
         } catch (IOException ex) {
             logger.error(ex.getMessage(), ex);
         }

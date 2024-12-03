@@ -22,7 +22,6 @@ public class DatabaseController extends DBConnector {
      * and the related data points.
      *
      * @param wave a wave object
-     * @author CiHao Zhang
      */
     public void addWaveDB(String simulationName, Wave wave) {
         String sql = String.format(
@@ -49,7 +48,8 @@ public class DatabaseController extends DBConnector {
      * Retrieves the wave to the database, which puts all parameters (Wave, waveType, frequency, amplitude and color)
      * and related data points as a resultSet
      *
-     * @author CiHao Zhang
+     * @param simulationName the name of the simulation
+     * @return an ArrayList of waves
      */
     public ArrayList<Wave> getWavesDB(String simulationName) {
         String sql = String.format("SELECT * FROM %s WHERE Name = %s", "Wave", "'" + simulationName + "'");
@@ -93,7 +93,6 @@ public class DatabaseController extends DBConnector {
      * Removes the wave based on a unique modifier color in the database.
      *
      * @param simulationName the name of the given simulation
-     * @author CiHao Zhang
      */
     public void clearWavesDB(String simulationName) {
         String sql = String.format("DELETE FROM %s WHERE Name = %s", "Wave", "'" + simulationName + "'");
@@ -106,11 +105,21 @@ public class DatabaseController extends DBConnector {
         }
     }
 
+    public void clearAllWavesDB() {
+        String sql = String.format("DELETE FROM %s", "Wave");
+        try {
+            Connection conn = Connector("wave.db");
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     /**
      * Updates pre-existing waves in the database.
      *
-     * @param wave
-     * @author CiHao Zhang
+     * @param wave a wave object
      */
     public void updateWavesDB(Wave wave) {
         String sql = String.format("UPDATE %s SET %s = ?, %s = ?, %s = ?, %s = ?, %s = ? WHERE %s = ?", "Wave",
@@ -130,7 +139,6 @@ public class DatabaseController extends DBConnector {
 
     /**
      * Load the presets into the database.
-     * @author CiHao Zhang
      */
     public void loadPresets() {
         // Pure Sine Wave Preset

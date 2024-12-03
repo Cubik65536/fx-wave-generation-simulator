@@ -41,7 +41,7 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
 
     private WaveSimulationController waveSimulationController;
     private SoundController soundController;
-    private DatabaseController databaseController;
+    public DatabaseController databaseController;
 
     private Wave wave;
 
@@ -84,9 +84,6 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
 
     @FXML
     private TableColumn<Wave, Double> amplitudeColumn;
-
-    @FXML
-    private TableColumn<Wave, Double> currentAmplitudeColumn;
 
     @FXML
     private Button addWaveButton;
@@ -167,9 +164,11 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
     public void initialize() {
         logger.info("Initializing MainAppController...");
 
+        // Initialize WaveSimulationController and databaseController
         waveSimulationController = new WaveSimulationController(500, this);
         databaseController = new DatabaseController();
 
+        // Initialize SoundController and load presets
         try {
             soundController = new SoundController();
             databaseController.loadPresets();
@@ -178,7 +177,6 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
         }
 
         // Initialize ComboBox with presets
-        // TO-DO: Add & Load Presets : Build #3
         presetComboBox.getItems().addAll("Pure Sin", "Square Wave", "Triangle Wave", "Sawtooth Wave");
         presetComboBox.setOnAction(this::handlePresetComboBox);
 
@@ -193,12 +191,12 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
         typeColumn.setCellValueFactory(new PropertyValueFactory<>("waveType"));
         frequencyColumn.setCellValueFactory(new PropertyValueFactory<>("frequency"));
         amplitudeColumn.setCellValueFactory(new PropertyValueFactory<>("amplitude"));
-        // The use of currentAmplitudeColumn is part of another build, as it requires Wave Generator to clash multiple waves.
-//        currentAmplitudeColumn.setCellValueFactory(new PropertyValueFactory<>("currentAmplitude"));
 
+        // Initialize buttons
         importButton.setOnAction(this::handleImportButton);
         exportButton.setOnAction(this::handleExportButton);
 
+        //Attribute images to buttons
         Image play = new Image("/images/circle-play.png");
         playButton.setImage(play);
 
@@ -208,20 +206,22 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
         Image pause = new Image("/images/circle-pause.png");
         pauseButton.setImage(pause);
 
+        Image step = new Image("/images/circle-step.png");
+        stepButton.setImage(step);
+
         //Instantiating the ColorAdjust class
         ColorAdjust clickedButton = new ColorAdjust();
 
-        //Setting the contrast value
+        //setting the color of the button
         clickedButton.setContrast(0.4);
-
-        //Setting the hue value
         clickedButton.setHue(-0.05);
-
         clickedButton.setBrightness(1.0);
-
         clickedButton.setSaturation(0.5);
+
+        //Instantiating the ColorAdjust class
         ColorAdjust unClickedButton = new ColorAdjust();
 
+        //resizing the images & buttons
         playButton.setFitHeight(50);
         playButton.setFitWidth(50);
 
@@ -231,6 +231,10 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
         pauseButton.setFitHeight(50);
         pauseButton.setFitWidth(50);
 
+        stepButton.setFitHeight(50);
+        stepButton.setFitWidth(50);
+
+        //Setting up the functionalities of buttons & light up effect.
         try {
             playButton.setOnMouseClicked(event -> {
                 waveSimulationController.start();
@@ -272,33 +276,47 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
                 pauseButton.setEffect(unClickedButton);
                 stopButton.setEffect(clickedButton);
             });
-//            stepButton.setOnAction(event -> {
-//                int step = 100;
-//                waveSimulationController.step(step);
-//                if (analyzerFXMLController != null) {
-//                    // Update the sound data on the chart
-//                    analyzerFXMLController.step(step);
-//                }
-//            });
+            stepButton.setOnMouseClicked(event -> {
+                int stepping = 100;
+                System.out.println("stepping");
+                waveSimulationController.step(stepping);
+                if (analyzerFXMLController != null) {
+                    // Update the sound data on the chart
+                    analyzerFXMLController.step(stepping);
+                }
+            });
+
+            stepButton.setOnMousePressed(event -> {
+                stepButton.setEffect(clickedButton);
+            });
+
+            stepButton.setOnMouseReleased(event -> {
+                stepButton.setEffect(unClickedButton);
+            });
+
         } catch (Exception e) {
             logger.error("Error initializing wave simulation: {}", e.getMessage());
             showAlert("Error", "Error initializing wave simulation: " + e.getMessage());
         }
 
+        //Set up the buttons for adding waves
         addWaveButton.setOnAction(event -> {
             dialogBoxController = new DialogBoxController();
             dialogBoxController.showAndWait();
             if (!dialogBoxController.isCancelled()) {
                 // Only read new wave data if the add wave dialog is not closed by cancel
                 Wave newWave = dialogBoxController.getWave();
-                try {
-                    addWave(newWave);
-                } catch (LineUnavailableException | IOException e) {
-                    throw new RuntimeException(e);
+                if (!(newWave == null)) {
+                    try {
+                        addWave(newWave);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             }
         });
 
+        // Set up the buttons for removing waves
         removeWaveButton.setOnAction(event -> {
             Wave selectedWave = addedWavesTableView.getSelectionModel().getSelectedItem();
             if (selectedWave != null) {
@@ -310,6 +328,7 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
             }
         });
 
+        // Set up the button for clearing waves
         clearWavesButton.setOnAction(event -> {
             try {
                 clearWaves();
@@ -333,6 +352,7 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
             soundController.stop();
         });
 
+        // Set up the checkbox for the wave analyzer
         showAnalyzerCheckBox.selectedProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue) {
                 // Show the Wave Analyzer
@@ -440,6 +460,10 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
         }
     }
 
+    /**
+     * Handles the selection of each preset in the ComboBox and allows them to be retrieved from the database.
+     * @param event The clicked event
+     */
     public void handlePresetComboBox(ActionEvent event) {
         try {
         String preset = presetComboBox.getSelectionModel().getSelectedItem();
