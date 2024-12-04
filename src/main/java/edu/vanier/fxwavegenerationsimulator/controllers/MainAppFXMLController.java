@@ -30,11 +30,11 @@ import java.util.ArrayList;
 import java.util.Map;
 
 /**
- *  FXML controller class for the main application.
- *  This class handles all UI elements in the main application.
- *  Requires the WaveSimulationController class to be initialized.
+ * FXML controller class for the main application.
+ * This class handles all UI elements in the main application.
+ * Requires the WaveSimulationController class to be initialized.
  *
- *  @author CihaoZhang
+ * @author CihaoZhang
  */
 public class MainAppFXMLController implements WaveSimulationDisplay {
     private final static Logger logger = LoggerFactory.getLogger(MainAppFXMLController.class);
@@ -111,6 +111,7 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
     /**
      * The setter for the analyzerFXMLController, so the MainApp can pass in the controller
      * so the current Main App Controller can control the Analyzer Window.
+     *
      * @param analyzerFXMLController the controller of the Analyzer Window
      */
     public void setAnalyzerFXMLController(AnalyzerFXMLController analyzerFXMLController) {
@@ -119,6 +120,7 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
 
     /**
      * Add the new wave to ALL required places (simulation controller, audio controller, table view, etc.)
+     *
      * @param newWave the new wave to be added
      * @author Qian Qian
      */
@@ -134,6 +136,7 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
 
     /**
      * Remove a specific wave from all places.
+     *
      * @param wave the wave to be removed
      */
     private void removeWave(Wave wave) throws LineUnavailableException, IOException {
@@ -148,16 +151,19 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
 
     /**
      * Clear all waves from the all places.
+     *
      * @author Qian Qian
      */
     private void clearWaves() throws LineUnavailableException, IOException {
         // Clear the TableView
         addedWavesTableView.getItems().clear();
-        // Clear the WaveSimulationController and SoundController
-        waveSimulationController.clearWaves();
+        // Clear the SoundController
         soundController.clearWaves();
         // Clear the chart
         chart.getDatasets().clear();
+
+        // Reinstantiate the WaveSimulationController
+        waveSimulationController = new WaveSimulationController(500, this);
     }
 
     @FXML
@@ -277,8 +283,7 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
                 stopButton.setEffect(clickedButton);
             });
             stepButton.setOnMouseClicked(event -> {
-                int stepping = 100;
-                System.out.println("stepping");
+                int stepping = 1;
                 waveSimulationController.step(stepping);
                 if (analyzerFXMLController != null) {
                     // Update the sound data on the chart
@@ -387,6 +392,7 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
 
     /**
      * Handles the features from the import button. Opens a file chooser to select the JSON file to import.
+     *
      * @param event The event triggered by the user clicking the import button.
      */
     @FXML
@@ -420,7 +426,8 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
 
     /**
      * Gives an alert with the given title and message
-     * @param title the title of the alert
+     *
+     * @param title   the title of the alert
      * @param message the error message
      */
     public static void showAlert(String title, String message) {
@@ -433,6 +440,7 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
 
     /**
      * Handles the features from the export button. Opens a file chooser to select the JSON file to export.
+     *
      * @param event The event triggered by the user clicking the export button.
      */
     @FXML
@@ -462,41 +470,42 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
 
     /**
      * Handles the selection of each preset in the ComboBox and allows them to be retrieved from the database.
+     *
      * @param event The clicked event
      */
     public void handlePresetComboBox(ActionEvent event) {
         try {
-        String preset = presetComboBox.getSelectionModel().getSelectedItem();
-        ArrayList<Wave> wavesToAdd;
-        switch (preset) {
-            case "Pure Sin":
-                clearWaves();
-                wavesToAdd = databaseController.getWavesDB("Pure Sine");
-                for (Wave wave: wavesToAdd) {
-                    addWave(wave);
-                }
-                break;
-            case "Square Wave":
-                clearWaves();
-                wavesToAdd = databaseController.getWavesDB("Square Wave");
-                for (Wave wave: wavesToAdd) {
-                    addWave(wave);
-                }
-                break;
-            case "Sawtooth Wave":
-                clearWaves();
-                wavesToAdd = databaseController.getWavesDB("Sawtooth Wave");
-                for (Wave wave: wavesToAdd) {
-                    addWave(wave);
-                }
-                break;
-            case "Triangle Wave":
-                clearWaves();
-                wavesToAdd = databaseController.getWavesDB("Triangle Wave");
-                for (Wave wave: wavesToAdd) {
-                    addWave(wave);
-                }
-                break;
+            String preset = presetComboBox.getSelectionModel().getSelectedItem();
+            ArrayList<Wave> wavesToAdd;
+            switch (preset) {
+                case "Pure Sin":
+                    clearWaves();
+                    wavesToAdd = databaseController.getWavesDB("Pure Sine");
+                    for (Wave wave : wavesToAdd) {
+                        addWave(wave);
+                    }
+                    break;
+                case "Square Wave":
+                    clearWaves();
+                    wavesToAdd = databaseController.getWavesDB("Square Wave");
+                    for (Wave wave : wavesToAdd) {
+                        addWave(wave);
+                    }
+                    break;
+                case "Sawtooth Wave":
+                    clearWaves();
+                    wavesToAdd = databaseController.getWavesDB("Sawtooth Wave");
+                    for (Wave wave : wavesToAdd) {
+                        addWave(wave);
+                    }
+                    break;
+                case "Triangle Wave":
+                    clearWaves();
+                    wavesToAdd = databaseController.getWavesDB("Triangle Wave");
+                    for (Wave wave : wavesToAdd) {
+                        addWave(wave);
+                    }
+                    break;
             }
         } catch (Exception e) {
             System.err.println("An unexpected error occurred: " + e.getMessage());
@@ -507,34 +516,38 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
     /**
      * Creates a dataset for each wave and adds it to the chart. This method draws the graph of the wave.
      * This is the main UI component of the application.
-     * @param dataPoints the map that contains the wave object and its corresponding data points to generate the wave graph.
+     *
+     * @param dataPoints   the map that contains the wave object and its corresponding data points to generate the wave graph.
      * @param milliseconds the time elapsed since the simulation started.
      */
     @Override
     public void update(Map<Wave, double[]> dataPoints, double milliseconds) {
-        // Clear previous data series
-        Platform.runLater(() -> chart.getDatasets().clear());
+        Platform.runLater(() -> {
+            // Clear previous data series
+            chart.getDatasets().clear();
 
-        // Iterate over each wave and its corresponding data points
-        for (Map.Entry<Wave, double[]> entry : dataPoints.entrySet()) {
-            Wave wave = entry.getKey();
-            double[] points = entry.getValue();
+            // Iterate over each wave and its corresponding data points
+            for (Map.Entry<Wave, double[]> entry : dataPoints.entrySet()) {
+                Wave wave = entry.getKey();
+                double[] points = entry.getValue();
 
-            // Create a dataset for each wave
-            DefaultDataSet dataSet = new DefaultDataSet(wave.getWaveType().toString());
+                // Create a dataset for each wave
+                DefaultDataSet dataSet = new DefaultDataSet(wave.getWaveType().toString());
 
-            for (int i = 0; i < points.length; i++) {
-                dataSet.add(i, points[i]); // X is the index (time or position), Y is the amplitude
+                for (int i = 0; i < points.length; i++) {
+                    dataSet.add(i, points[i]); // X is the index (time or position), Y is the amplitude
+                }
+
+                // Add the dataset to the chart
+                chart.getDatasets().add(dataSet);
             }
-
-            // Add the dataset to the chart
-            Platform.runLater(() -> chart.getDatasets().add(dataSet));
-        }
+        });
     }
 
     /**
      * A getter for the "Show Analyzer" CheckBox, so it can be
      * automatically unchecked elsewhere when the Analyzer Window is closed.
+     *
      * @return the object of the "Show Analyzer" CheckBox
      * @author Qian Qian
      */
@@ -545,6 +558,7 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
     /**
      * A getter for the Sound Controller so that the Wave Analyzer can access it
      * to get sound data to show.
+     *
      * @return the Sound Controller object that is active in this simulation
      * @author Qian Qian
      */
