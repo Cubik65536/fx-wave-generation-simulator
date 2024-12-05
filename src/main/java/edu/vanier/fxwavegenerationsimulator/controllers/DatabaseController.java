@@ -1,5 +1,6 @@
 package edu.vanier.fxwavegenerationsimulator.controllers;
 
+import edu.vanier.fxwavegenerationsimulator.MainApp;
 import edu.vanier.fxwavegenerationsimulator.db.DBConnector;
 import edu.vanier.fxwavegenerationsimulator.enums.WaveTypes;
 import edu.vanier.fxwavegenerationsimulator.models.Color;
@@ -10,6 +11,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The controller that handles all database related operations.
@@ -17,6 +21,33 @@ import java.util.ArrayList;
  * @author Qian Qian
  */
 public class DatabaseController extends DBConnector {
+    private final static Logger logger = LoggerFactory.getLogger(DatabaseController.class);
+    /**
+     * If a table does not already exist within the user's computer, it will create a new SQLite table with the
+     * corresponding variables. This will server as a local database to write to.
+     */
+    public void initializeDatabase() {
+        String createTableSQL = """
+        CREATE TABLE IF NOT EXISTS Wave (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            Name TEXT NOT NULL,
+            waveType TEXT NOT NULL,
+            frequency INTEGER NOT NULL,
+            amplitude REAL NOT NULL,
+            color TEXT NOT NULL
+        );
+    """;
+        // In the event that it has not been created, it will be created.
+        try (Connection conn = Connector("wave.db");
+             Statement stmt = conn.createStatement()) {
+
+            stmt.execute(createTableSQL);
+            logger.info("Table 'Wave' created or already exists.");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     /**
      * Adding the wave to the database, which retrieves all parameters (Wave, waveType, frequency, amplitude and color)
      * and the related data points.
@@ -25,8 +56,8 @@ public class DatabaseController extends DBConnector {
      */
     public void addWaveDB(String simulationName, Wave wave) {
         String sql = String.format(
-                "INSERT INTO %s (%s, %s, %s, %s, %s, %s) VALUES (?, ?, ?, ?, ?, ?)", "Wave", "Name", "waveType", "frequency",
-                "amplitude", "data", "color");
+                "INSERT INTO %s (%s, %s, %s, %s, %s) VALUES (?, ?, ?, ?, ?)", "Wave", "Name", "waveType", "frequency",
+                "amplitude", "color");
 
         try {
             Connection conn = Connector("wave.db");
@@ -36,8 +67,7 @@ public class DatabaseController extends DBConnector {
             stmt.setString(2, wave.getWaveType().toString());
             stmt.setInt(3, wave.getFrequency());
             stmt.setDouble(4, wave.getAmplitude());
-            stmt.setString(5, data);
-            stmt.setString(6, wave.getColor().toString());
+            stmt.setString(5, wave.getColor().toString());
             stmt.executeUpdate();
         } catch (Exception e) {
             e.printStackTrace();
@@ -130,7 +160,7 @@ public class DatabaseController extends DBConnector {
             stmt.setString(2, wave.getWaveType().toString());
             stmt.setInt(3, wave.getFrequency());
             stmt.setDouble(4, wave.getAmplitude());
-            stmt.setString(6, wave.getColor().toString());
+            stmt.setString(5, wave.getColor().toString());
             stmt.executeUpdate();
         } catch (Exception e) {
             e.printStackTrace();
@@ -138,9 +168,63 @@ public class DatabaseController extends DBConnector {
     }
 
     /**
+     * Gets all simulationNames in a list from the database by using the SQL query.
+     * @return A list of all simulation names
+     */
+    public List<String> getAllSimulationNames() {
+        String sql = "SELECT DISTINCT Name FROM Wave";
+        List<String> simulationNames = new ArrayList<>();
+
+        try (Connection conn = Connector("wave.db");
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            while (rs.next()) {
+                simulationNames.add(rs.getString("Name"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return simulationNames;
+    }
+
+    /**
+     * Used to increment the next simulation number in the database.
+     * @return An increment for simulation numbers.
+     */
+    public int getNextSimulationNumber() {
+        List<String> simulationNames = getAllSimulationNames();
+        int maxSimulationNumber = 0;
+
+        for (String name : simulationNames) {
+            if (name.startsWith("Simulation ")) {
+                try {
+                    int number = Integer.parseInt(name.substring("Simulation ".length()));
+                    maxSimulationNumber = Math.max(maxSimulationNumber, number);
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return maxSimulationNumber + 1; // Return the next number
+    }
+
+    /**
      * Load the presets into the database.
      */
     public void loadPresets() {
+        // Clear all waves in the database in the case of the default presets
+        for (String name : getAllSimulationNames()) {
+            switch (name) {
+                case "Pure Sine", "Triangle Wave", "Square Wave", "Sawtooth Wave":
+                    clearWavesDB(name);
+                    break;
+                default:
+                    break;
+            }
+        }
         // Pure Sine Wave Preset
         addWaveDB("Pure Sine", new Wave(WaveTypes.SIN, 10, 1.0, new Color()));
 

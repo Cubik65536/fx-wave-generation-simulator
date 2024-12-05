@@ -15,12 +15,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This is a JavaFX project template to be used for creating GUI applications.
- * The JavaFX GUI framework (version: 22.0.2) is linked to this project in the
- * build.gradle file.
+ * This is the main application class. It handles the bootstrapping of the application, instantiating of controllers and
+ * loading the FXML files.
  * @link: https://openjfx.io/javadoc/22/
  * @see: /Build Scripts/build.gradle
- * @author frostybee.
+ * @author CihaoZhang
  */
 public class MainApp extends Application {
 
@@ -56,11 +55,6 @@ public class MainApp extends Application {
             primaryStage.show();
             primaryStage.setAlwaysOnTop(false);
 
-            primaryStage.setOnCloseRequest(event -> {
-                mainAppFXMLController.databaseController.clearAllWavesDB();
-                logger.info("Application shutdown.");
-                System.exit(0);
-            });
         } catch (IOException ex) {
             logger.error(ex.getMessage(), ex);
         }
@@ -89,7 +83,7 @@ public class MainApp extends Application {
      * @param fxmlController An instance of the FXML controller to be associated
      * with the loaded FXML scene graph.
      * @return The root node of the loaded scene graph.
-     * @throws IOException
+     * @throws IOException If the FXML file cannot be loaded.
      */
     public static Parent loadFXML(String fxmlFile, Object fxmlController) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(MainApp.class.getResource("/fxml/" + fxmlFile + ".fxml"));

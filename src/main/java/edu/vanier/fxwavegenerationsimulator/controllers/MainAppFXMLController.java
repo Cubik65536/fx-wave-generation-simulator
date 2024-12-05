@@ -27,7 +27,10 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * FXML controller class for the main application.
@@ -50,13 +53,24 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
      */
     private AnalyzerFXMLController analyzerFXMLController;
 
+    /**
+     * The addWave dialog box controller that controls the pop-up window for adding waves.
+     */
     public DialogBoxController dialogBoxController;
+
+    private Map<String, Wave> predefinedSimulations = new HashMap<>();
 
     @FXML
     private Button importButton;
 
     @FXML
     private Button exportButton;
+
+    @FXML
+    private Button saveButton;
+
+    @FXML
+    private Button refreshButton;
 
     @FXML
     private ComboBox<String> presetComboBox;
@@ -105,6 +119,9 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
 
     @FXML
     private CheckBox showAnalyzerCheckBox;
+
+    @FXML
+    private ListView<String> simulationListView = new ListView<>();
 
     private XYChart chart;
 
@@ -173,6 +190,7 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
         // Initialize WaveSimulationController and databaseController
         waveSimulationController = new WaveSimulationController(500, this);
         databaseController = new DatabaseController();
+        databaseController.initializeDatabase();
 
         // Initialize SoundController and load presets
         try {
@@ -198,9 +216,14 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
         frequencyColumn.setCellValueFactory(new PropertyValueFactory<>("frequency"));
         amplitudeColumn.setCellValueFactory(new PropertyValueFactory<>("amplitude"));
 
-        // Initialize buttons
+        // Initialize import/export buttons
         importButton.setOnAction(this::handleImportButton);
         exportButton.setOnAction(this::handleExportButton);
+
+        // Initialize saveButton to save previous simulations to database
+        saveButton.setOnAction(this::handleSaveButton);
+        displaySimulationNames();
+        refreshButton.setOnAction(this::handleRefreshButton);
 
         //Attribute images to buttons
         Image play = new Image("/images/circle-play.png");
@@ -228,17 +251,17 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
         ColorAdjust unClickedButton = new ColorAdjust();
 
         //resizing the images & buttons
-        playButton.setFitHeight(50);
-        playButton.setFitWidth(50);
+        playButton.setFitHeight(40);
+        playButton.setFitWidth(40);
 
-        stopButton.setFitHeight(50);
-        stopButton.setFitWidth(50);
+        stopButton.setFitHeight(40);
+        stopButton.setFitWidth(40);
 
-        pauseButton.setFitHeight(50);
-        pauseButton.setFitWidth(50);
+        pauseButton.setFitHeight(40);
+        pauseButton.setFitWidth(40);
 
-        stepButton.setFitHeight(50);
-        stepButton.setFitWidth(50);
+        stepButton.setFitHeight(40);
+        stepButton.setFitWidth(40);
 
         //Setting up the functionalities of buttons & light up effect.
         try {
@@ -410,7 +433,9 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
                 // Read the JSON content from the file
                 String jsonContent = new String(Files.readAllBytes(file.toPath()));
                 // Use the JsonDataController to import the wave data
-                JsonDataController.importWaveSimulation(waveSimulationController, jsonContent);
+                for (Wave wave :JsonDataController.importWaveSimulation(jsonContent)) {
+                    addWave(wave);
+                }
                 logger.info("Wave data imported successfully from " + file.getAbsolutePath());
             } else {
                 logger.warn("Import canceled or no file selected.");
@@ -421,6 +446,8 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
         } catch (IOException e) {
             logger.error("An error occurred while importing wave data: " + e.getMessage());
             showAlert("Error", "An error occurred while importing wave data: " + e.getMessage());
+        } catch (LineUnavailableException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -436,6 +463,14 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    /**
+     * Handles the logic behind the refresh button. Refreshes the list of simulation names.
+     * @param event The event triggered by the user clicking the refresh button.
+     */
+    private void handleRefreshButton(ActionEvent event) {
+        displaySimulationNames();
     }
 
     /**
@@ -469,14 +504,38 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
     }
 
     /**
+     * The logic behind the save button. Saves the current wave simulation to the database. This can be later retrieved
+     * in read previous simulations.
+     * @param event The event triggered by the user clicking the save button.
+     */
+    private void handleSaveButton(ActionEvent event) {
+        // Checks if there are any waves to save
+        if (!waveSimulationController.getWaves().isEmpty()) {
+            // Get the next available simulation number
+            int nextSimulationNumber = databaseController.getNextSimulationNumber();
+            String newSimulationName = "Simulation " + nextSimulationNumber;
+
+            // Save all waves under the new simulation name
+            for (Wave wave : waveSimulationController.getWaves()) {
+                databaseController.addWaveDB(newSimulationName, wave);
+            }
+            logger.info("Simulation saved as: " + newSimulationName);
+        } else {
+            logger.warn("No waves to save!");
+        }
+    }
+
+    /**
      * Handles the selection of each preset in the ComboBox and allows them to be retrieved from the database.
      *
      * @param event The clicked event
      */
     public void handlePresetComboBox(ActionEvent event) {
         try {
+            // Get the selected preset
             String preset = presetComboBox.getSelectionModel().getSelectedItem();
             ArrayList<Wave> wavesToAdd;
+            // Get the corresponding waves from the database
             switch (preset) {
                 case "Pure Sin":
                     clearWaves();
@@ -511,6 +570,55 @@ public class MainAppFXMLController implements WaveSimulationDisplay {
             System.err.println("An unexpected error occurred: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Displays the names of all simulations in the database in the simulation list view.
+     * This also locks the selection in the list view.
+     */
+    private void displaySimulationNames() {
+        // Reads the last selected simulation
+        AtomicReference<String> lastSelectedSimulation = new AtomicReference<>(null);
+        // Clear any existing items
+        simulationListView.getItems().clear();
+
+        // Fetch simulation names from the database
+        List<String> simulationNames = databaseController.getAllSimulationNames();
+        simulationListView.getItems().addAll(simulationNames);
+
+        // Add a selection listener for loading simulations (placeholder)
+        simulationListView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                if (!newValue.equals(lastSelectedSimulation.get())) {
+                    System.out.println("Selected simulation: " + newValue);
+
+                    // Check if the simulation exists in predefined ones
+                    if (!predefinedSimulations.containsKey(newValue)) {
+                        // Check if the simulation exists in the database
+                        List<Wave> waves = databaseController.getWavesDB(newValue);
+                        if (waves.isEmpty()) {
+                            // Simulation not found in the database either
+                            System.out.println("Simulation not found in database.");
+                        } else {
+                            // Simulation found in the database
+                            System.out.println("Simulation found in database.");
+                            for (Wave wave : waves) {
+                                try {
+                                    addWave(wave);
+                                } catch (LineUnavailableException | IOException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                        }
+                    } else {
+                        System.out.println("Simulation not created yet: " + newValue);
+                    }
+                } else {
+                    System.out.println("You cannot re-select the same simulation: " + newValue);
+                    simulationListView.getSelectionModel().clearSelection();
+                }
+            }
+        });
     }
 
     /**

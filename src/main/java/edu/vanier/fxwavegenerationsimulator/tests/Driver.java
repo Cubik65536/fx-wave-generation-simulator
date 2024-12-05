@@ -53,7 +53,7 @@ public class Driver {
         WaveSimulationController waveSimulationController = new WaveSimulationController(10.0, waveSimulationTestDisplay);
 
         String jsonString = "[{\"waveType\":\"SIN\",\"frequency\":1,\"amplitude\":1.0,\"color\":{\"red\":145,\"green\":16,\"blue\":215}},{\"waveType\":\"SIN\",\"frequency\":1,\"amplitude\":-1.0,\"color\":{\"red\":198,\"green\":205,\"blue\":90}}]";
-        JsonDataController.importWaveSimulation(waveSimulationController, jsonString);
+        System.out.println(JsonDataController.importWaveSimulation(jsonString));
 
         waveSimulationController.start();
     }
